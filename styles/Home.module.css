@@ -1,5 +1,42 @@
 .container {
   padding: 0 2rem;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  min-height: 100vh;
+  background: #f0f2f5
+}
+
+.loginContainer{
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  width: 25%;
+  padding: 10px;
+  border-radius: 5px;
+  background: #ffffff;
+  box-shadow: 1px 1px 10px;
+
+}
+.colunmDir{
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.profilecard{
+  background: #ffffff;
+  padding: 10px;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  box-shadow: 1px 1px 10px;
+  border-radius: 10px;
+  width: 350px;
+  gap: 10px;
 }
 
 .main {
@@ -107,6 +144,8 @@
   height: 1em;
   margin-left: 0.5rem;
 }
+
+
 
 @media (max-width: 600px) {
   .grid {
