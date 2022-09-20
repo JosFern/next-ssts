@@ -14,6 +14,7 @@ import Button from '@mui/material/Button';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
 import { useRouter } from 'next/router';
+import DashboardLayout from '../components/DashboardLayout'
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -44,23 +45,10 @@ const rows = [
   createData('Nov 14,22', 'Nov 18,22', 'holiday vacation'),
 ];
 
-const style = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    boxShadow: 24,
-    borderRadius: '5px',
-    p: 4,
-};
-
-
 export default function Home() {
 
     return (
-        <div
+        <DashboardLayout
             style={{
                 background: '#f0f2f5',
                 minHeight: '100vh'
@@ -124,6 +112,6 @@ export default function Home() {
                 </div>
             </Container>
 
-        </div>
+        </DashboardLayout>
   )
 }

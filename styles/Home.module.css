@@ -1,3 +1,6 @@
+
+
+
 .container {
   padding: 0 2rem;
   display: flex;
@@ -5,7 +8,7 @@
   justify-content: center;
   align-items: center;
   min-height: 100vh;
-  background: #f0f2f5
+  background: #f4faec;
 }
 
 .loginContainer{
@@ -17,7 +20,13 @@
   padding: 10px;
   border-radius: 5px;
   background: #ffffff;
-  box-shadow: 1px 1px 10px;
+  box-shadow: 0 2.8px 2.2px rgba(0, 0, 0, 0.034),
+    0 6.7px 5.3px rgba(0, 0, 0, 0.048),
+    0 12.5px 10px rgba(0, 0, 0, 0.06),
+    0 22.3px 17.9px rgba(0, 0, 0, 0.072),
+    0 41.8px 33.4px rgba(0, 0, 0, 0.086),
+    0 100px 80px rgba(0, 0, 0, 0.12);
+    
 
 }
 .colunmDir{
@@ -33,10 +42,15 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  box-shadow: 1px 1px 10px;
   border-radius: 10px;
   width: 350px;
   gap: 10px;
+  box-shadow: 0 2.8px 2.2px rgba(0, 0, 0, 0.034),
+    0 6.7px 5.3px rgba(0, 0, 0, 0.048),
+    0 12.5px 10px rgba(0, 0, 0, 0.06),
+    0 22.3px 17.9px rgba(0, 0, 0, 0.072),
+    0 41.8px 33.4px rgba(0, 0, 0, 0.086),
+    0 100px 80px rgba(0, 0, 0, 0.12);
 }
 
 .main {
@@ -145,7 +159,44 @@
   margin-left: 0.5rem;
 }
 
+.appbar{
+  background: #fbad01;
+  margin-bottom: 10px;
+  box-shadow: none;
+}
 
+.dbProfInfo{
+  display: flex;
+  gap: 1rem;
+  background: rgba(247, 188, 95, 200);
+  padding: 1.5rem;
+  border-radius: 10px;
+}
+
+.dbLeaves, .dbOvertimeLimit, .dbAbsentLimit {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  height: 100%;
+  padding: 1.5rem;
+  border-radius: 10px;
+}
+
+.dbLeaves{
+  background: rgba(94, 53, 177, 0.8);
+  flex-grow: 1;
+}
+
+.dbOvertimeLimit{
+  background: rgba(251, 150, 120, 0.8);
+  flex-grow: 1;
+}
+
+.dbAbsentLimit {
+  background: rgba(30, 136, 229, 0.8);
+  flex-grow: 1;
+}
 
 @media (max-width: 600px) {
   .grid {

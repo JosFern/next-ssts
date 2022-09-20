@@ -1,6 +1,5 @@
 import { Avatar, ButtonGroup, Modal, Table, TableBody, TableContainer, TableHead, TableRow, TextField } from '@mui/material'
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import Container from '@mui/material/Container'
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
@@ -8,9 +7,13 @@ import Typography from '@mui/material/Typography'
 import { green } from '@mui/material/colors'
 import { useState } from 'react';
 import { Box } from '@mui/system';
-import Input from '@mui/material/Input';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
+import DashboardLayout from '../components/DashboardLayout'
+import styles from '../../styles/Home.module.css'
+import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
+import MoreTimeIcon from '@mui/icons-material/MoreTime';
+import RunningWithErrorsIcon from '@mui/icons-material/RunningWithErrors';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
   [`&.${tableCellClasses.head}`]: {
@@ -33,16 +36,15 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
  
 
-function createData(first, last, email, position, Salary, password) {
-    return { first, last, email, position, Salary, password };
+function createData(id, first, last, email, position, Salary, password) {
+    return { id, first, last, email, position, Salary, password };
 }
 
 const rows = [
-    createData('Frozen','yoghurt', 'forze@gmail.com', 'ice cream', 20, '123123123'),
-    createData('Frozen','yoghurt', 'froze@gmail.com', 'ice cream', 20, '123123123'),
-    createData('Frozen','yoghurt', 'forza@gmail.com', 'ice cream', 20, '123123123'),
-    createData('Frozen','yoghurt', 'forzo@gmail.com', 'ice cream', 20, '123123123'),
-    createData('Frozen','yoghurt', 'forte@gmail.com', 'ice cream', 20, '123123123'),
+    createData( 1, 'Frozen','yoghurt', 'forze@gmail.com', 'ice cream', 20, '123123123'),
+    createData( 2, 'Frozen','yoghurt', 'froze@gmail.com', 'ice cream', 20, '123123123'),
+    createData( 3, 'Frozen','yoghurt', 'forza@gmail.com', 'ice cream', 20, '123123123'),
+    createData( 4, 'Frozen','yoghurt', 'forzo@gmail.com', 'ice cream', 20, '123123123'),
 ];
 
 const style = {
@@ -56,10 +58,6 @@ const style = {
     borderRadius: '5px',
     p: 4,
 };
-
-const root = {
-    background: '#f0f2f5',
-}
 
 function Employer() {
 
@@ -93,237 +91,240 @@ function Employer() {
     }
 
     return (
-        <div style={{
-            background: '#f0f2f5',
-            minHeight: '100vh'
-        }}>
-            <Container>
+        <DashboardLayout>
 
-                <div
-                    style={{
-                        background: '#ffffff',
-                        padding: '1rem',
-                        borderRadius: '5px',
-                        display: 'flex',
-                        alignItems: 'center',
-                        gap: '1rem',
-                        color: 'gray',
-                        boxShadow: '1px 1px 10px'
-                    }}
-                >
-                    <Link href='../Profile'>
-                        <Avatar sx={{ bgcolor: green[400], width: 100, height: 100 }}>E</Avatar>
+            <div
+                style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                    gap: '1rem',
+                    color: '#fff',
+                }}
+            >
+
+                <div className={styles.dbProfInfo}>
+                    <Link href='../profile'>
+                        <Avatar sx={{ bgcolor: green[400], width: 100, height: 100, fontSize: '40px' }}>E</Avatar>
                     </Link>
                     
                     <div>
-                        <Link href='../Profile'>
-                            <Typography style={{cursor: 'pointer'}} mt={2} variant='h4' margin={0} padding={0}>EmployerName</Typography>
+                        <Link href='../profile'>
+                            <Typography style={{cursor: 'pointer'}} mt={2} variant='h5' margin={0} padding={0}>EmployerName</Typography>
                         </Link>
                         <Typography mt={2} mb={2}>Employer</Typography>
-                        <Button onClick={() => setAddModal(true)} variant='contained'>+ Add Employee</Button>
-
+                        <Button onClick={() => router.push('/employee/form')} variant='contained'>+ Add Employee</Button>
                     </div>
 
-                    <div>
-                        <Typography mt={2} >Leaves: 2</Typography>
-                        <Typography mt={2} >Overtime Limit: 20 hrs</Typography>
-                        <Typography mt={2} >Absent Limit: 2</Typography>
-                    </div>
-
-                
                 </div>
 
-                <div
-                    style={{
-                        marginTop: '20px'
-                    }}
+                <div className={styles.dbLeaves}>
+                    <MeetingRoomIcon sx={{ width: 70, height: 70 }}/>
+                    <Typography mt={2} variant='h5' >Leaves: 2</Typography>
+                </div>
+                <div className={styles.dbOvertimeLimit}>
+                    <MoreTimeIcon sx={{ width: 70, height: 70 }}/>
+                    <Typography mt={2} variant='h5' >Overtime Limit: 20 hrs</Typography>
+                </div>
+
+                <div className={styles.dbAbsentLimit}>
+                    <RunningWithErrorsIcon sx={{ width: 70, height: 70 }}/>
+                    <Typography mt={2} variant='h5' >Absent Limit: 2</Typography>
+                </div>
+
+            
+            </div>
+
+            <div
+                style={{
+                    marginTop: '20px'
+                }}
+            >
+                <TableContainer component={Paper}>
+                    <Table sx={{ minWidth: 700 }}>
+                        <TableHead>
+                            <TableRow>
+                                <StyledTableCell>First Name</StyledTableCell>
+                                <StyledTableCell>Last Name</StyledTableCell>
+                                <StyledTableCell>Email</StyledTableCell>
+                                <StyledTableCell>Position</StyledTableCell>
+                                <StyledTableCell>Salary</StyledTableCell>
+                                <StyledTableCell>Actions</StyledTableCell>
+                            </TableRow>
+                        </TableHead>
+                        <TableBody>
+                            {rows.map((row, index) => (
+                                <StyledTableRow
+                                    key={index}
+                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                >
+                                    <StyledTableCell component="th" scope="row">
+                                    {row.first}
+                                    </StyledTableCell>
+                                    <StyledTableCell >{row.last}</StyledTableCell>
+                                    <StyledTableCell >{row.email}</StyledTableCell>
+                                    <StyledTableCell >{row.position}</StyledTableCell>
+                                    <StyledTableCell >{row.Salary}</StyledTableCell>
+                                    <StyledTableCell >
+                                        <ButtonGroup variant="contained" aria-label="outlined primary button group">
+                                            <Button color='info' onClick={() => router.push('/employee/'+row.id)} >Info</Button>
+                                            <Button color='success' onClick={() => router.push('/employee/form?id='+row.id)}>Update</Button>
+                                            <Button color='error'>Delete</Button>
+                                        </ButtonGroup>
+                                    </StyledTableCell>
+                                </StyledTableRow>
+                                ))}
+                        </TableBody>
+                    </Table>
+                </TableContainer>
+            </div>
+
+            {/*MODAL FOR ADD EMPLOYEE */}
+            <Modal
+                open={addModal}
+                onClose={() => setAddModal(false)}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
                 >
-                    <TableContainer component={Paper}>
-                        <Table sx={{ minWidth: 700 }}>
-                            <TableHead>
-                                <TableRow>
-                                    <StyledTableCell>First Name</StyledTableCell>
-                                    <StyledTableCell>Last Name</StyledTableCell>
-                                    <StyledTableCell>Email</StyledTableCell>
-                                    <StyledTableCell>Position</StyledTableCell>
-                                    <StyledTableCell>Salary</StyledTableCell>
-                                    <StyledTableCell>Actions</StyledTableCell>
-                                </TableRow>
-                            </TableHead>
-                            <TableBody>
-                                {rows.map((row, index) => (
-                                    <StyledTableRow
-                                        key={index}
-                                        sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                    >
-                                        <StyledTableCell component="th" scope="row">
-                                        {row.first}
-                                        </StyledTableCell>
-                                        <StyledTableCell >{row.last}</StyledTableCell>
-                                        <StyledTableCell >{row.email}</StyledTableCell>
-                                        <StyledTableCell >{row.position}</StyledTableCell>
-                                        <StyledTableCell >{row.Salary}</StyledTableCell>
-                                        <StyledTableCell >
-                                            <ButtonGroup variant="contained" aria-label="outlined primary button group">
-                                                <Button color='info' onClick={() => router.push('/Employer/'+row.email)} >Info</Button>
-                                                <Button color='success' onClick={() => toggleUpdateModal(row, index)}>Update</Button>
-                                                <Button color='error'>Delete</Button>
-                                            </ButtonGroup>
-                                        </StyledTableCell>
-                                    </StyledTableRow>
-                                    ))}
-                            </TableBody>
-                        </Table>
-                    </TableContainer>
-                </div>
+                <Box sx={style}>
+                    <Typography id="modal-modal-title" variant="h5" component="h2">
+                    Add Employee
+                    </Typography>
+                    <form onSubmit={handleAddEmpSubmit}>
+                        <TextField
+                            type="text"
+                            label='First name'
+                            variant="outlined"
+                            color="secondary"
+                            margin='normal'
+                            fullWidth
+                            required
+                        />
+                        <TextField
+                            type="text"
+                            label='Last name'
+                            variant="outlined"
+                            color="secondary"
+                            margin='normal'
+                            fullWidth
+                            required
+                        />
+                        <TextField
+                            type="text"
+                            label='Email'
+                            variant="outlined"
+                            color="secondary"
+                            margin='normal'
+                            fullWidth
+                            required
+                        />
+                        <TextField
+                            type="text"
+                            label='Position'
+                            variant="outlined"
+                            color="secondary"
+                            margin='normal'
+                            fullWidth
+                            required
+                        />
+                        <div
+                            style={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: '10px',
+                                margin: '10px 0' 
+                            }}
+                        >
+                            <TextField
+                                type='number'
+                                label='Overtime'
+                            />
+                            <TextField
+                                type='number'
+                                label='Absences'
+                            />
+                            <TextField
+                                type='number'
+                                label='leaves'
+                            />
+                        </div>
 
-                {/*MODAL FOR ADD EMPLOYEE */}
-                <Modal
-                    open={addModal}
-                    onClose={() => setAddModal(false)}
-                    aria-labelledby="modal-modal-title"
-                    aria-describedby="modal-modal-description"
-                    >
-                    <Box sx={style}>
-                        <Typography id="modal-modal-title" variant="h5" component="h2">
-                        Add Employee
-                        </Typography>
-                        <form onSubmit={handleAddEmpSubmit}>
-                            <TextField
-                                type="text"
-                                label='First name'
-                                variant="outlined"
-                                color="secondary"
-                                margin='normal'
-                                fullWidth
-                                required
-                            />
-                            <TextField
-                                type="text"
-                                label='Last name'
-                                variant="outlined"
-                                color="secondary"
-                                margin='normal'
-                                fullWidth
-                                required
-                            />
-                            <TextField
-                                type="text"
-                                label='Email'
-                                variant="outlined"
-                                color="secondary"
-                                margin='normal'
-                                fullWidth
-                                required
-                            />
-                            <TextField
-                                type="text"
-                                label='Position'
-                                variant="outlined"
-                                color="secondary"
-                                margin='normal'
-                                fullWidth
-                                required
-                            />
-                            <div
-                                style={{
-                                    display: 'flex',
-                                    alignItems: 'center',
-                                    gap: '10px',
-                                    margin: '10px 0' 
-                                }}
-                            >
-                                <TextField
-                                    type='number'
-                                    label='Overtime'
-                                />
-                                <TextField
-                                    type='number'
-                                    label='Absences'
-                                />
-                                <TextField
-                                    type='number'
-                                    label='leaves'
-                                />
-                            </div>
+                        <Button variant='contained'>Submit</Button>
+                    </form>
+                </Box>
+            </Modal>
 
-                            <Button variant='contained'>Submit</Button>
-                        </form>
-                    </Box>
-                </Modal>
+            {/*MODAL FOR ADD EMPLOYEE */}
 
-                {/*MODAL FOR ADD EMPLOYEE */}
+            <Modal
+                open={editModal}
+                onClose={() => setEditModal(false)}
+                aria-labelledby="modal-modal-title"
+                aria-describedby="modal-modal-description"
+                >
+                <Box sx={style}>
+                    <Typography id="modal-modal-title" variant="h5" component="h2">
+                    Add Employee
+                    </Typography>
+                    <form onSubmit={handleAddEmpSubmit}>
+                        <TextField
+                            defaultValue={editEmpInfo.firstname}
+                            type="text"
+                            label='First name'
+                            variant="outlined"
+                            color="secondary"
+                            margin='normal'
+                            fullWidth
+                            required
+                        />
+                        <TextField
+                            defaultValue={editEmpInfo.lastname}
+                            type="text"
+                            label='Last name'
+                            variant="outlined"
+                            color="secondary"
+                            margin='normal'
+                            fullWidth
+                            required
+                        />
+                        <TextField
+                            defaultValue={editEmpInfo.email}
+                            type="text"
+                            label='Email'
+                            variant="outlined"
+                            color="secondary"
+                            margin='normal'
+                            fullWidth
+                            required
+                        />
+                        <TextField
+                            defaultValue={editEmpInfo.position}
+                            type="text"
+                            label='Position'
+                            variant="outlined"
+                            color="secondary"
+                            margin='normal'
+                            fullWidth
+                            required
+                        />
 
-                <Modal
-                    open={editModal}
-                    onClose={() => setEditModal(false)}
-                    aria-labelledby="modal-modal-title"
-                    aria-describedby="modal-modal-description"
-                    >
-                    <Box sx={style}>
-                        <Typography id="modal-modal-title" variant="h5" component="h2">
-                        Add Employee
-                        </Typography>
-                        <form onSubmit={handleAddEmpSubmit}>
-                            <TextField
-                                defaultValue={editEmpInfo.firstname}
-                                type="text"
-                                label='First name'
-                                variant="outlined"
-                                color="secondary"
-                                margin='normal'
-                                fullWidth
-                                required
-                            />
-                            <TextField
-                                defaultValue={editEmpInfo.lastname}
-                                type="text"
-                                label='Last name'
-                                variant="outlined"
-                                color="secondary"
-                                margin='normal'
-                                fullWidth
-                                required
-                            />
-                            <TextField
-                                defaultValue={editEmpInfo.email}
-                                type="text"
-                                label='Email'
-                                variant="outlined"
-                                color="secondary"
-                                margin='normal'
-                                fullWidth
-                                required
-                            />
-                            <TextField
-                                defaultValue={editEmpInfo.position}
-                                type="text"
-                                label='Position'
-                                variant="outlined"
-                                color="secondary"
-                                margin='normal'
-                                fullWidth
-                                required
-                            />
+                        <TextField
+                            defaultValue={editEmpInfo.password}
+                            type="text"
+                            label='Password'
+                            variant="outlined"
+                            color="secondary"
+                            margin='normal'
+                            fullWidth
+                            required
+                        />
 
-                            <TextField
-                                defaultValue={editEmpInfo.password}
-                                type="text"
-                                label='Password'
-                                variant="outlined"
-                                color="secondary"
-                                margin='normal'
-                                fullWidth
-                                required
-                            />
+                        <Button variant='contained'>Submit</Button>
+                    </form>
+                </Box>
+            </Modal>
 
-                            <Button variant='contained'>Submit</Button>
-                        </form>
-                    </Box>
-                </Modal>
-            </Container>
-
-        </div>
+        </DashboardLayout>
     )
 }
 
