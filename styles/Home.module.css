@@ -165,6 +165,10 @@
   box-shadow: none;
 }
 
+.tableHead{
+  color: #fbad01;
+}
+
 .dbProfInfo{
   display: flex;
   gap: 1rem;
@@ -173,7 +177,7 @@
   border-radius: 10px;
 }
 
-.dbLeaves, .dbOvertimeLimit, .dbAbsentLimit {
+.dbLeaves, .dbOvertimeLimit, .dbAbsentLimit, .dbSalary, .dbMonthlySalary {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -181,6 +185,7 @@
   height: 100%;
   padding: 1.5rem;
   border-radius: 10px;
+  text-align: center;
 }
 
 .dbLeaves{
@@ -196,6 +201,36 @@
 .dbAbsentLimit {
   background: rgba(30, 136, 229, 0.8);
   flex-grow: 1;
+}
+
+.dbSalary{
+  background: #44bd32;
+  flex-grow: 1;
+}
+
+.dbMonthlySalary{
+  background: #e1b12c;
+  flex-grow: 1;
+}
+
+.dbMonthlySalary:hover{
+  background: #fbc531;
+}
+
+.dbSalary:hover{
+  background: #4cd137;
+}
+
+.dbAbsentLimit:hover{
+  background: rgba(30, 136, 229, 1);
+}
+
+.dbLeaves:hover {
+  background: rgba(94, 53, 177, 1);
+}
+
+.dbOvertimeLimit:hover {
+  background: rgba(251, 150, 120, 1);
 }
 
 @media (max-width: 600px) {

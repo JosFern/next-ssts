@@ -1,153 +1,211 @@
-import { TextField, Typography } from '@mui/material'
-import Container from '@mui/material/Container'
+import { TextField, Typography, Box, FormControl, InputLabel, Select, MenuItem } from '@mui/material'
 import Button from '@mui/material/Button';
 import { useRouter } from 'next/router';
 import DashboardLayout from '../components/DashboardLayout'
+import _ from 'lodash'
+import { useEffect, useState } from 'react';
 
-export default function Home() {
+export default function EmployeeForm() {
 
     const router = useRouter()
 
-    const handleAddEmpSubmit = (e) => {
-        e.preventDefault()
+    const isFormAdd = _.isEmpty(router?.query)
+
+    const [employeeInfo, setEmployeeInfo] = useState({
+        firstName: '',
+        lastName: '',
+        email: '',
+        company: '',
+        employeeID: '',
+        position: '',
+        salaryPerHour: 0,
+        employeeType: '',
+        password: '',
+        confirmPassword: ''
+    })
+
+    useEffect(() => {
+        if (!isFormAdd) {
+            setEmployeeInfo({
+                ...employeeInfo,
+                firstName: 'joselito',
+                lastName: 'baisac',
+                salaryPerHour: 123,
+                employeeType: 'parttime'
+            })
+        }
+    }, [isFormAdd, employeeInfo])
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setEmployeeInfo({
+            ...employeeInfo,
+            [name]: value
+        })
     }
 
-    if (router.query?.id) return (
-        <DashboardLayout>
-            <Container sx={{width: 400, background: '#fff', padding: '15px 0', borderRadius: 5, boxShadow:  '1px 1px 10px'}}>
-                <Typography id="modal-modal-title" variant="h5" component="h2">
-                        Update Employee
-                        </Typography>
-                        <form onSubmit={handleAddEmpSubmit}>
-                    <TextField
-                        defaultValue='Joselito'
-                                type="text"
-                                label='First name'
-                                variant="outlined"
-                                color="secondary"
-                                margin='normal'
-                                fullWidth
-                                required
-                            />
-                    <TextField
-                        defaultValue='Basic'
-                                type="text"
-                                label='Last name'
-                                variant="outlined"
-                                color="secondary"
-                                margin='normal'
-                                fullWidth
-                                required
-                            />
-                    <TextField
-                        defaultValue='joselito@gmail.com'
-                                type="text"
-                                label='Email'
-                                variant="outlined"
-                                color="secondary"
-                                margin='normal'
-                                fullWidth
-                                required
-                            />
-                    <TextField
-                        defaultValue='intern'
-                                type="text"
-                                label='Position'
-                                variant="outlined"
-                                color="secondary"
-                                margin='normal'
-                                fullWidth
-                                required
-                            />
-
-                    <TextField
-                        defaultValue='123123123'
-                                type="text"
-                                label='Password'
-                                variant="outlined"
-                                color="secondary"
-                                margin='normal'
-                                fullWidth
-                                required
-                            />
-
-                            <Button variant='contained'>Update</Button>
-                        </form>
-            </Container>
-
-        </DashboardLayout>
-    )
-
+    const handleAddEmpSubmit = (e) => {
+        e.preventDefault()
+        console.log(employeeInfo);
+    }
 
     return (
         <DashboardLayout>
-            <Container sx={{width: 400, background: '#fff', padding: '15px 0', borderRadius: 5, boxShadow:  '1px 1px 10px'}}>
-                <Typography id="modal-modal-title" variant="h5" component="h2">
-                    Add Employee
+            <Box className='bg-white p-4 flex flex-col justify-center items-center rounded-md shadow-lg text-gray-600'>
+                <Typography className="" id="modal-modal-title" variant="h5" component="h2">
+                    {isFormAdd ? 'Add Employee' : 'Update Employee'}
                 </Typography>
-                <form onSubmit={handleAddEmpSubmit}>
-                    <TextField
-                        type="text"
-                        label='First name'
-                        variant="outlined"
-                        color="secondary"
-                        margin='normal'
-                        fullWidth
-                        required
-                    />
-                    <TextField
-                        type="text"
-                        label='Last name'
-                        variant="outlined"
-                        color="secondary"
-                        margin='normal'
-                        fullWidth
-                        required
-                    />
-                    <TextField
-                        type="text"
-                        label='Email'
-                        variant="outlined"
-                        color="secondary"
-                        margin='normal'
-                        fullWidth
-                        required
-                    />
-                    <TextField
-                        type="text"
-                        label='Position'
-                        variant="outlined"
-                        color="secondary"
-                        margin='normal'
-                        fullWidth
-                        required
-                    />
-                    <div
-                        style={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            gap: '10px',
-                            margin: '10px 0' 
-                        }}
-                    >
+                <Box className='w-full' component="form" onSubmit={handleAddEmpSubmit}>
+                    <Box className='flex gap-1'>
                         <TextField
-                            type='number'
-                            label='Overtime'
+                            name='firstName'
+                            type="text"
+                            label='First name'
+                            variant="outlined"
+                            color="secondary"
+                            margin='dense'
+                            required
+                            fullWidth
+                            onChange={handleChange}
+                            value={employeeInfo.firstName}
+                            data-testid="firstname-input"
                         />
                         <TextField
-                            type='number'
-                            label='Absences'
+                            name='lastName'
+                            type="text"
+                            label='Last name'
+                            variant="outlined"
+                            color="secondary"
+                            margin='dense'
+                            required
+                            fullWidth
+                            onChange={handleChange}
+                            value={employeeInfo.lastName}
+                            data-testid="lastname-input"
                         />
                         <TextField
-                            type='number'
-                            label='leaves'
+                            name='email'
+                            type="text"
+                            label='Email'
+                            variant="outlined"
+                            color="secondary"
+                            margin='dense'
+                            fullWidth
+                            required
+                            onChange={handleChange}
+                            value={employeeInfo.email}
+                            data-testid="email-input"
                         />
-                    </div>
+                    </Box>
 
-                    <Button variant='contained'>Submit</Button>
-                </form>
-            </Container>
+                    <Box className='flex gap-1'>
+                        <TextField
+                            name='company'
+                            type="text"
+                            label='Company'
+                            variant="outlined"
+                            color="secondary"
+                            margin='dense'
+                            fullWidth
+                            required
+                            onChange={handleChange}
+                            value={employeeInfo.company}
+                            data-testid="company-input"
+                        />
+                        <TextField
+                            name='employeeID'
+                            type="text"
+                            label='Employee ID'
+                            variant="outlined"
+                            color="secondary"
+                            margin='dense'
+                            fullWidth
+                            required
+                            onChange={handleChange}
+                            value={employeeInfo.employeeID}
+                            data-testid="employeeID-input"
+                        />
+
+                    </Box>
+
+                    <Box className='flex gap-1'>
+                        <TextField
+                            name='position'
+                            type="text"
+                            label='Position'
+                            variant="outlined"
+                            color="secondary"
+                            margin='dense'
+                            fullWidth
+                            required
+                            onChange={handleChange}
+                            value={employeeInfo.position}
+                            data-testid="position-input"
+                        />
+
+                        <TextField
+                            name='salaryPerHour'
+                            type="number"
+                            label='Salary Per Hour'
+                            variant="outlined"
+                            color="secondary"
+                            margin='dense'
+                            fullWidth
+                            required
+                            onChange={handleChange}
+                            value={employeeInfo.salaryPerHour}
+                            data-testid="salaryPerHour-input"
+                        />
+
+                        <FormControl required fullWidth margin='dense'>
+                            <InputLabel>Employee Type</InputLabel>
+                            <Select
+                                name='employeeType'
+                                label="Employee Type"
+                                value={employeeInfo.employeeType}
+                                onChange={handleChange}
+                                data-testid="employeeType-input"
+                            >
+                                <MenuItem value="fulltime">Full Time</MenuItem>
+                                <MenuItem value="parttime">Part Time</MenuItem>
+                            </Select>
+                        </FormControl>
+
+
+                    </Box>
+
+
+                    <TextField
+                        name='password'
+                        type="password"
+                        label='Password'
+                        variant="outlined"
+                        color="secondary"
+                        margin='dense'
+                        fullWidth
+                        required
+                        onChange={handleChange}
+                        value={employeeInfo.password}
+                        data-testid="password-input"
+                    />
+                    <TextField
+                        name='confirmPassword'
+                        type="password"
+                        label='Confirm password'
+                        variant="outlined"
+                        color="secondary"
+                        margin='dense'
+                        fullWidth
+                        required
+                        onChange={handleChange}
+                        value={employeeInfo.confirmPassword}
+                        data-testid="confirmPassword-input"
+                    />
+
+                    <Button className='bg-[#44bd32] hover:bg-[#4cd137] text-white tracking-wider' type='submit' variant='contained'>Submit</Button>
+                </Box>
+            </Box>
 
         </DashboardLayout>
-  )
+    )
 }

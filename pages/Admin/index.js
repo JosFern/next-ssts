@@ -1,100 +1,97 @@
-import { Avatar, ButtonGroup, Modal, Table, TableBody, TableContainer, TableHead, TableRow, TextField } from '@mui/material'
+import { Avatar, ButtonGroup, Box, Table, TableBody, TableContainer, TableHead, TableRow } from '@mui/material'
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import Container from '@mui/material/Container'
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography'
 import { green } from '@mui/material/colors'
-import { useState } from 'react';
-import { Box } from '@mui/system';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
 import DashboardLayout from '../components/DashboardLayout'
+import { useDispatch, useSelector } from 'react-redux';
+import _ from 'lodash';
+import { deleteAccount } from '../../store/reducers/account';
+import { deleteEmployer } from '../../store/reducers/employer';
+import { deleteCompany } from '../../store/reducers/company';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
-  [`&.${tableCellClasses.head}`]: {
-    backgroundColor: theme.palette.common.black,
-    color: theme.palette.common.white,
-  },
-  [`&.${tableCellClasses.body}`]: {
-    fontSize: 14,
-  },
+    [`&.${tableCellClasses.head}`]: {
+        backgroundColor: '#192a56',
+        color: theme.palette.common.white,
+        textAlign: 'center'
+    },
+    [`&.${tableCellClasses.body}`]: {
+        fontSize: 14,
+        textAlign: 'center'
+    },
 }));
 
 const StyledTableRow = styled(TableRow)(({ theme }) => ({
-  '&:nth-of-type(odd)': {
-    backgroundColor: theme.palette.action.hover,
-  },
-  // hide last border
-  '&:last-child td, &:last-child th': {
-    border: 0,
-  },
+    '&:nth-of-type(odd)': {
+        backgroundColor: theme.palette.action.hover,
+    },
+    // hide last border
+    '&:last-child td, &:last-child th': {
+        border: 0,
+    },
 }));
- 
+
 
 function createData(id, first, last, email, position, Salary, password, companyName) {
     return { id, first, last, email, position, Salary, password, companyName };
 }
 
 const rows = [
-    createData(1, 'Employer','main', 'employer1@gmail.com', 'ice cream', 20, '123123123', 'Lemondrop'),
-    createData(2, 'main','Employer', 'employer2@gmail.com', 'ice cream', 20, '123123123', 'Workbean'),
+    createData(1, 'Employer', 'main', 'employer1@gmail.com', 'ice cream', 20, '123123123', 'Lemondrop'),
+    createData(2, 'main', 'Employer', 'employer2@gmail.com', 'ice cream', 20, '123123123', 'Workbean'),
 ];
-
-const style = {
-    position: 'absolute',
-    top: '50%',
-    left: '50%',
-    transform: 'translate(-50%, -50%)',
-    width: 400,
-    bgcolor: 'background.paper',
-    boxShadow: 24,
-    borderRadius: '5px',
-    p: 4,
-};
 
 function Admin() {
 
-    const [addModal, setAddModal] = useState(false)
-
     const router = useRouter()
 
-    const handleAddEmpSubmit = (e) => {
-        e.preventDefault()
+    const comp = useSelector(state => state.company)
+    const emplyr = useSelector(state => state.employer)
+    const dispatch = useDispatch()
+
+    const handleDeleteEmployer = (id) => {
+        dispatch(deleteAccount(id))
+        dispatch(deleteEmployer(id))
     }
+
     return (
         <DashboardLayout >
-            <div
-                style={{
-                    background: '#ffffff',
-                    padding: '1rem',
-                    borderRadius: '5px',
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '1rem',
-                    color: 'gray',
-                    boxShadow: '1px 1px 10px',
-                    marginBottom: '15px'
-                }}
+            <Box
+                className='bg-white p-3 rounded-md flex items-center gap-4 text-gray-700 shadow-md mb-6'
+
+                data-testid="admin-basic-info"
             >
                 <Link href='../profile'>
-                    <Avatar sx={{ bgcolor: green[400], width: 100, height: 100 }}>A</Avatar>
+                    <Avatar sx={{ bgcolor: green[800], width: 100, height: 100, fontSize: '40px' }}>A</Avatar>
                 </Link>
-                
-                <div>
+
+                <Box>
                     <Link href='../profile'>
-                        <Typography style={{cursor: 'pointer'}} mt={2} variant='h4' margin={0} padding={0}>AdminName</Typography>
+                        <Typography style={{ cursor: 'pointer' }} mt={2} variant='h4' margin={0} padding={0}>AdminName</Typography>
                     </Link>
                     <Typography mb={2}>Admin</Typography>
-                    <Button onClick={() => router.push('/employer/form')} variant='contained'>+ Add Employer</Button>
+                    <Box>
+                        <Button className='bg-[#0055fb] text-white hover:bg-[#001b51] mr-4' onClick={() => router.push('/employer/form')} variant='contained'>+ Add Employer</Button>
 
-                </div>
+                        <Button className='bg-[#0055fb] text-white hover:bg-[#001b51]' onClick={() => router.push('/company/form')} variant='contained'>+ Add Company</Button>
 
-            
-            </div>
+                    </Box>
 
-            <TableContainer component={Paper}>
+                </Box>
+
+
+            </Box>
+
+            <Typography className='text-center my-4 font-bold text-2xl tracking-wide'>
+                Employers
+            </Typography>
+
+            <TableContainer component={Paper} data-testid="employer-table">
                 <Table sx={{ minWidth: 700 }}>
                     <TableHead>
                         <TableRow>
@@ -106,90 +103,67 @@ function Admin() {
                         </TableRow>
                     </TableHead>
                     <TableBody>
-                        {rows.map((row, index) => (
+                        {_.map(emplyr.employers, (row, index) => (
                             <StyledTableRow
                                 key={index}
                                 sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                             >
                                 <StyledTableCell component="th" scope="row">
-                                {row.first}
+                                    {row.firstName}
                                 </StyledTableCell>
-                                <StyledTableCell >{row.last}</StyledTableCell>
+                                <StyledTableCell >{row.lastName}</StyledTableCell>
                                 <StyledTableCell >{row.email}</StyledTableCell>
-                                <StyledTableCell >{row.companyName}</StyledTableCell>
+                                <StyledTableCell >{row.company}</StyledTableCell>
                                 <StyledTableCell >
-                                        <ButtonGroup variant="contained" aria-label="outlined primary button group">
-                                            <Button color='success' onClick={() => router.push('/employer/form?id='+row.id)}>Update</Button>
-                                            <Button color='error'>Delete</Button>
-                                        </ButtonGroup>
-                                    </StyledTableCell>
+                                    <ButtonGroup variant="contained" aria-label="outlined primary button group">
+                                        <Button className='bg-[#33b33d]' color='success' onClick={() => router.push('/employer/form?id=' + row.id)}>Update</Button>
+                                        <Button className='bg-[#dc3c18]' color='error' onClick={() => handleDeleteEmployer(index)}>Delete</Button>
+                                    </ButtonGroup>
+                                </StyledTableCell>
                             </StyledTableRow>
-                            ))}
+                        ))}
                     </TableBody>
                 </Table>
             </TableContainer>
 
-            <Modal
-                open={addModal}
-                onClose={() => setAddModal(false)}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-                >
-                <Box sx={style}>
-                    <Typography id="modal-modal-title" variant="h5" component="h2">
-                    Add Employer
-                    </Typography>
-                    <form onSubmit={handleAddEmpSubmit}>
-                        <TextField
-                            type="text"
-                            label='Company name'
-                            variant="outlined"
-                            color="secondary"
-                            margin='normal'
-                            fullWidth
-                            required
-                        />
-                        <TextField
-                            type="text"
-                            label='First name'
-                            variant="outlined"
-                            color="secondary"
-                            margin='normal'
-                            fullWidth
-                            required
-                        />
-                        <TextField
-                            type="text"
-                            label='Last name'
-                            variant="outlined"
-                            color="secondary"
-                            margin='normal'
-                            fullWidth
-                            required
-                        />
-                        <TextField
-                            type="text"
-                            label='Email'
-                            variant="outlined"
-                            color="secondary"
-                            margin='normal'
-                            fullWidth
-                            required
-                        />
-                        <TextField
-                            type="password"
-                            label='Password'
-                            variant="outlined"
-                            color="secondary"
-                            margin='normal'
-                            fullWidth
-                            required
-                        />
 
-                        <Button variant='contained'>Submit</Button>
-                    </form>
-                </Box>
-            </Modal>
+            <Typography className='text-center my-4 font-bold text-2xl tracking-wide'>
+                Companies
+            </Typography>
+            <TableContainer component={Paper} data-testid="employer-table">
+                <Table sx={{ minWidth: 700 }}>
+                    <TableHead>
+                        <TableRow>
+                            <StyledTableCell>Account ID</StyledTableCell>
+                            <StyledTableCell>Company name</StyledTableCell>
+                            <StyledTableCell>Leaves</StyledTableCell>
+                            <StyledTableCell>Overtime Limit</StyledTableCell>
+                            <StyledTableCell>Actions</StyledTableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {_.map(comp.companies, (row, index) => (
+                            <StyledTableRow
+                                key={index}
+                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                            >
+                                <StyledTableCell component="th" scope="row">
+                                    {row.accountID}
+                                </StyledTableCell>
+                                <StyledTableCell >{row.name}</StyledTableCell>
+                                <StyledTableCell >{row.leaves}</StyledTableCell>
+                                <StyledTableCell >{row.overtimeLimit}</StyledTableCell>
+                                <StyledTableCell >
+                                    <ButtonGroup variant="contained" aria-label="outlined primary button group">
+                                        <Button className='bg-[#33b33d]' color='success'>Update</Button>
+                                        <Button onClick={() => dispatch(deleteCompany(index))} className='bg-[#dc3c18]' color='error'>Delete</Button>
+                                    </ButtonGroup>
+                                </StyledTableCell>
+                            </StyledTableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
 
         </DashboardLayout>
     )

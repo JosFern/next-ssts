@@ -1,7 +1,5 @@
-import Head from 'next/head'
-import styles from '../styles/Home.module.css'
 import Typography from '@mui/material/Typography'
-
+import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
 import Radio from '@mui/material/Radio'
@@ -10,100 +8,106 @@ import FormControlLabel from '@mui/material/FormControlLabel'
 import FormControl from '@mui/material/FormControl'
 import FormLabel from '@mui/material/FormLabel'
 import { useState } from 'react';
-import Router, { useRouter } from 'next/router';
+import { useRouter } from 'next/router';
+import { Container } from '@mui/material';
+import { useDispatch, useSelector } from 'react-redux';
+import _ from 'lodash';
+import { setLogged } from '../store/reducers/logged';
 
 
-export default function Home() {
+export default function Login() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [emailError, setEmailError] = useState(false)
-  const [passwordError, setPasswordError] = useState(false)
-  const [category, setCategory] = useState('employee')
+  const [accountError, setAccountError] = useState(false)
+
+  const dispatch = useDispatch()
+  const acc = useSelector(state => state.account)
 
   const router = useRouter()
 
   const handleSubmit = (e) => {
     e.preventDefault()
-    setEmailError(false)
-    setPasswordError(false)
+    setAccountError(false)
 
-    if (email == '') {
-      setEmailError(true)
-    }
-    if (password == '') {
-      setPasswordError(true)
-    }
+    const account = _.find(acc.accounts, { email: email, password: password })
 
+    if (!account) {
+      setAccountError(true)
 
-    console.log(email, password, category);
-
-    if (category === 'employer') {
-      router.push(`/dashboard`)
-    } else if (category === 'employee') {
-      router.push(`/dashboard?role=${category}`)
     } else {
-      router.push(`/dashboard?role=${category}`)
+
+      dispatch(setLogged({ id: account.accountID, firstName: account.firstName, email: email, role: account.type }))
+
+      if (account.type === 'employer') router.push(`/dashboard`)
+
+      if (account.type === 'employee') router.push(`/dashboard?role=${account.type}`)
+
+      if (account.type === 'admin') router.push(`/dashboard?role=${account.type}`)
     }
 
-    
+
+
+
+
 
   }
   return (
-    <div className={styles.container}>
+    <Box className='flex justify-center items-center min-h-screen bg-[#f4faec]'>
 
-        <div className={styles.loginContainer}>
-          <Typography
-          variant="h6" 
-          color="textSecondary"
+      <Container className='w-[300px] bg-white p-4 rounded-md shadow-2xl flex flex-col justify-center items-center text-gray-700'>
+        <Typography
+          className='text-2xl'
+          variant="h6"
           component="h2"
           gutterBottom
         >
           Login
-          </Typography>
-          
-          <form className={styles.colunmDir} noValidate autoComplete="off" onSubmit={handleSubmit}>
+        </Typography>
+
+        <Box className='flex flex-col' component="form" onSubmit={handleSubmit}>
           <TextField
             onChange={(e) => setEmail(e.target.value)}
             type="text"
-              label="Email" 
-              variant="outlined" 
-              color="secondary"
-              margin='normal'
-              fullWidth
-              required
-              error={emailError}
+            label="Email"
+            variant="outlined"
+            color="secondary"
+            margin='normal'
+            fullWidth
+            required
+            error={accountError}
+            data-testid="email"
           />
           <TextField
             onChange={(e) => setPassword(e.target.value)}
             type="password"
-              label="Password"
-              variant="outlined"
-              color="secondary"
-              margin='normal'
-              fullWidth
-              required
-              error={passwordError}
+            label="Password"
+            variant="outlined"
+            color="secondary"
+            margin='normal'
+            fullWidth
+            required
+            error={accountError}
+            data-testid="password"
           />
 
-          <FormControl margin='normal'>
-            <FormLabel>Role</FormLabel>
-            <RadioGroup value={category} onChange={(e) => setCategory(e.target.value)}>
-              <FormControlLabel value="employer" control={<Radio />} label="Employer" />
-              <FormControlLabel value="employee" control={<Radio />} label="Employee" />
-              <FormControlLabel value="admin" control={<Radio />} label="Admin" />
-            </RadioGroup>
-          </FormControl>
+          {accountError &&
+            <Typography className='self-center' color='error'>
+              Invalid Account
+            </Typography>
+          }
 
           <Button
-            type="submit" 
-            color="secondary" 
-            variant="contained">
+            className='bg-[#e1b12c] text-white font-bold tracking-wide mt-4'
+            variant='contained'
+            type="submit"
+            data-testid="submit-btn"
+          >
             Login
           </Button>
-          
-          </form>
-        </div>
-    </div>
+
+        </Box>
+      </Container>
+    </Box>
   )
 }

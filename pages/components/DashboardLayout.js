@@ -7,18 +7,16 @@ import Typography from '@mui/material/Typography';
 import Button from '@mui/material/Button';
 import IconButton from '@mui/material/IconButton';
 import MenuIcon from '@mui/icons-material/Menu';
-import styles from '../../styles/Home.module.css'
 import Link from 'next/link';
 
 
-export default function DashboardLayout({children}) {
+export default function DashboardLayout({ children }) {
     return (
-        <div style={{
-            background: '#f4faec',
-            minHeight: '100vh'
-        }}>
-                <AppBar className={styles.appbar} position="static"  >
-                    <Toolbar>
+        <Box
+            className='bg-[#f4faec] min-h-screen '
+        >
+            <AppBar data-testid="appbar" className='text-white shadow-none bg-[#fbad01] mb-4' position="static"  >
+                <Toolbar>
                     <IconButton
                         size="large"
                         edge="start"
@@ -34,11 +32,11 @@ export default function DashboardLayout({children}) {
                     <Link href='/login'>
                         <Button color="inherit">Login</Button>
                     </Link>
-                    </Toolbar>
-                </AppBar>
+                </Toolbar>
+            </AppBar>
             <Container>
                 {children}
             </Container>
-        </div>
+        </Box>
     )
 }
