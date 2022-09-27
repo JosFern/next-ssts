@@ -31,10 +31,18 @@ export const CompanyStore = createSlice({
 
         deleteCompany: (state, action) => {
             state.companies.splice(action.payload, 1)
+        },
+
+        updateCompany: (state, action) => {
+            const { name, leaves, overtimeLimit, id } = action.payload
+
+            const index = _.findIndex(state.companies, { accountID: id })
+
+            state.companies[index] = { ...state.companies[index], name, leaves, overtimeLimit }
         }
     }
 })
 
-export const { setCompanies, addCompany, deleteCompany } = CompanyStore.actions
+export const { setCompanies, addCompany, deleteCompany, updateCompany } = CompanyStore.actions
 
 export default CompanyStore.reducer

@@ -48,10 +48,18 @@ export const AccountStore = createSlice({
         deleteAccount: (state, action) => {
             const index = _.findIndex(state.accounts, { accountID: action.payload })
             state.accounts.splice(index, 1)
+        },
+
+        updateAccount: (state, action) => {
+            const { firstName, email, password, id } = action.payload
+
+            const index = _.findIndex(state.accounts, { accountID: id })
+
+            state.accounts[index] = { ...state.accounts[index], firstName, email, password }
         }
     }
 })
 
-export const { setAccounts, addAccount, deleteAccount } = AccountStore.actions
+export const { setAccounts, addAccount, deleteAccount, updateAccount } = AccountStore.actions
 
 export default AccountStore.reducer

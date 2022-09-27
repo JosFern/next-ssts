@@ -15,7 +15,7 @@ import RunningWithErrorsIcon from '@mui/icons-material/RunningWithErrors';
 import { useDispatch, useSelector } from 'react-redux';
 import _ from 'lodash';
 import { useEffect } from 'react';
-import { setEmployees } from '../../store/reducers/employee';
+import { deleteEmployee, setEmployees } from '../../store/reducers/employee';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -142,10 +142,11 @@ function Employer() {
                     <Table sx={{ minWidth: 700 }}>
                         <TableHead>
                             <TableRow>
-                                <StyledTableCell>ID</StyledTableCell>
+                                <StyledTableCell>Employee ID</StyledTableCell>
                                 <StyledTableCell>First Name</StyledTableCell>
                                 <StyledTableCell>Last Name</StyledTableCell>
                                 <StyledTableCell>Salary Per Hour</StyledTableCell>
+                                <StyledTableCell>Employee Type</StyledTableCell>
                                 <StyledTableCell>Actions</StyledTableCell>
                             </TableRow>
                         </TableHead>
@@ -163,11 +164,12 @@ function Employer() {
                                     </StyledTableCell>
                                     <StyledTableCell >{row.lastName}</StyledTableCell>
                                     <StyledTableCell >{row.salaryPerHour}</StyledTableCell>
+                                    <StyledTableCell >{row.employeeType === 'fulltime' ? 'Full Time' : 'Part Time'}</StyledTableCell>
                                     <StyledTableCell >
                                         <ButtonGroup variant="contained">
                                             <Button className='bg-[#0e79e1]' color='info' onClick={() => router.push('/employee/' + row.id)} >Info</Button>
                                             <Button className='bg-[#33b33d]' color='success' onClick={() => router.push('/employee/form?id=' + row.id)}>Update</Button>
-                                            <Button className='bg-[#dc3c18]' color='error'>Delete</Button>
+                                            <Button onClick={() => dispatch(deleteEmployee(index))} className='bg-[#dc3c18]' color='error'>Delete</Button>
                                         </ButtonGroup>
                                     </StyledTableCell>
                                 </StyledTableRow>

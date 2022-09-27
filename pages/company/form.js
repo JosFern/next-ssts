@@ -6,7 +6,7 @@ import DashboardLayout from '../components/DashboardLayout'
 import { useEffect, useState } from 'react';
 import _, { lowerCase, replace } from 'lodash'
 import { useDispatch, useSelector } from 'react-redux';
-import { addCompany } from '../../store/reducers/company';
+import { addCompany, updateCompany } from '../../store/reducers/company';
 
 export default function CompanyForm() {
 
@@ -26,7 +26,27 @@ export default function CompanyForm() {
 
     const isFormAdd = _.isEmpty(router?.query)
 
+    const [origName, setOrigName] = useState('')
+
     const dispatch = useDispatch()
+
+    useEffect(() => {
+        if (!isFormAdd) {
+
+            const comp = _.find(com.companies, { accountID: Number(router?.query?.id) })
+
+            setOrigName(comp.name) //FOR VALIDATION IF NAME IS STILL THE SAME
+
+            setCompany({
+                ...company,
+                id: comp.id,
+                accountID: comp.accountID,
+                name: comp.name,
+                leaves: comp.leaves,
+                overtimeLimit: comp.overtimeLimit
+            })
+        }
+    }, [])
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -36,9 +56,7 @@ export default function CompanyForm() {
         })
     }
 
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        setError(false)
+    const validation = () => {
 
         const companies = _.map(com.companies, (company) => ({ ...company, name: lowerCase(company.name) }))
 
@@ -46,12 +64,52 @@ export default function CompanyForm() {
             return comp.name === lowerCase(company.name) || comp.accountID === Number(company.accountID)
         })
 
-        if (isExist) {
-            setError(true)
+        if (isFormAdd) {
+
+            if (isExist) return 'Company account already exist'
+
         } else {
-            dispatch(addCompany(company))
-            router.back()
+
+            if (origName !== company.name) {
+
+                const isCompanyExist = _.find(companies, { name: lowerCase(company.name) })
+
+                if (isCompanyExist) return 'Company name already exist'
+            }
         }
+
+
+        return 'ok'
+    }
+
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        setError(false)
+
+        const { accountID, name, leaves, overtimeLimit } = company
+
+        const valid = validation()
+
+        if (isFormAdd) {
+
+            if (valid !== 'ok') {
+                setError(true)
+            } else {
+                dispatch(addCompany(company))
+                router.back()
+            }
+
+        } else {
+
+            if (valid !== 'ok') {
+                setError(true)
+            } else {
+                dispatch(updateCompany({ id: accountID, name, leaves, overtimeLimit }))
+                router.back()
+            }
+        }
+
+
 
 
 
@@ -77,6 +135,7 @@ export default function CompanyForm() {
                         fullWidth
                         required
                         error={error}
+                        disabled={!isFormAdd}
                         data-testid="id-input"
                     />
                     <TextField
@@ -106,6 +165,7 @@ export default function CompanyForm() {
                         fullWidth
                         required
                         error={error}
+                        disabled={!isFormAdd}
                         data-testid="accountID-input"
                     />
 

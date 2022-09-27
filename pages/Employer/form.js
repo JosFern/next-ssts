@@ -6,8 +6,8 @@ import DashboardLayout from '../components/DashboardLayout'
 import { useEffect, useState } from 'react';
 import _ from 'lodash'
 import { useDispatch, useSelector } from 'react-redux';
-import employer, { addEmployer } from '../../store/reducers/employer';
-import { addAccount } from '../../store/reducers/account';
+import { addEmployer, updateEmployer } from '../../store/reducers/employer';
+import { addAccount, updateAccount } from '../../store/reducers/account';
 
 export default function EmployerForm() {
 
@@ -23,18 +23,41 @@ export default function EmployerForm() {
         confirmPassword: ''
     })
 
+    const [origEmail, setOrigEmail] = useState('')
+
     const comp = useSelector(state => state.company)
+    const acc = useSelector(state => state.account)
     const emp = useSelector(state => state.employer)
     const dispatch = useDispatch()
 
     const [error, setError] = useState(false)
+    const [message, setMessage] = useState('')
 
     const isFormAdd = _.isEmpty(router?.query)
 
     useEffect(() => {
 
         if (!isFormAdd) {
+            const employer = _.find(emp.employers, { accountID: Number(router?.query?.id) })
+            const passInfo = _.find(acc.accounts, { accountID: Number(router?.query?.id) })
+
+            setOrigEmail(employer.email) //FOR VALIDATION IF EMAIL IS STILL THE SAME
+
+            setEmployerInfo({
+                ...employerInfo,
+                accountID: employer.accountID,
+                firstName: employer.firstName,
+                lastName: employer.lastName,
+                company: employer.company,
+                email: employer.email,
+
+                password: passInfo.password,
+                confirmPassword: passInfo.password
+
+            })
         }
+
+        console.log('useeffect checker');
     }, [isFormAdd])
 
     const handleChange = (e) => {
@@ -45,23 +68,71 @@ export default function EmployerForm() {
         })
     }
 
-    const handleSubmit = (e) => {
-        e.preventDefault()
-        setError(false)
+    //----------HANDLES FORM VALIDATION EMPLOYER---------------
+    const validation = () => {
 
-        const { accountID, firstName, lastName, email, company, password, confirmPassword } = employerInfo;
+        if (employerInfo.password !== employerInfo.confirmPassword) return 'Passwords not matched'
 
         const isExist = _.find(emp.employers, function (employer) {
             return employer.email === employerInfo.email || employer.accountID === Number(employerInfo.accountID)
         })
 
-        if (isExist) {
-            setError(true)
+        if (isFormAdd) {
+
+            if (isExist) return 'Account already exist'
+
         } else {
-            dispatch(addEmployer({ accountID, firstName, lastName, email, company }))
-            dispatch(addAccount({ accountID, firstName, email, password, type: 'employer' }))
-            router.back()
+
+            if (origEmail !== employerInfo.email) {
+
+                const isEmailExist = _.find(emp.employers, { email: employerInfo.email })
+
+                if (isEmailExist) return 'Account already exist'
+            }
         }
+
+
+        return 'ok'
+    }
+
+    //----------HANDLES FORM SUBMITION---------------
+    const handleSubmit = (e) => {
+        e.preventDefault()
+        setError(false)
+        setMessage('')
+
+        const { accountID, firstName, lastName, email, company, password } = employerInfo;
+
+        const message = validation()
+
+
+        if (isFormAdd) {
+            //THIS IS FOR WHEN ADDING NEW EMPLOYER
+
+
+            if (message !== 'ok') {
+                setError(true)
+                setMessage(message)
+            } else {
+                dispatch(addEmployer({ accountID: Number(accountID), firstName, lastName, email, company }))
+                dispatch(addAccount({ accountID: Number(accountID), firstName, email, password, type: 'employer' }))
+                router.back()
+            }
+
+        } else {
+            //THIS IS FOR WHEN UPDATING EMPLOYER
+
+            if (message !== 'ok') {
+                setError(true)
+                setMessage(message)
+            } else {
+                dispatch(updateEmployer({ id: Number(accountID), firstName, lastName, email, company }))
+                dispatch(updateAccount({ id: Number(accountID), firstName, email, password }))
+                router.back()
+            }
+
+        }
+
     }
 
 
@@ -73,7 +144,7 @@ export default function EmployerForm() {
             }}
         >
             <Container sx={{ width: 700, background: '#fff', padding: '15px 0', borderRadius: 5, boxShadow: '1px 1px 10px' }}>
-                <Typography id="modal-modal-title" variant="h5" component="h2">
+                <Typography className='text-center' id="modal-modal-title" variant="h5" component="h2">
                     {isFormAdd ? 'Add Employer' : 'Update Employer'}
                 </Typography>
                 <Box component="form" onSubmit={handleSubmit}>
@@ -89,6 +160,7 @@ export default function EmployerForm() {
                         fullWidth
                         required
                         error={error}
+                        disabled={!isFormAdd}
                         data-testid="email-input"
                     />
                     <Box className='flex gap-1'>
@@ -138,7 +210,7 @@ export default function EmployerForm() {
 
                     </Box>
                     <FormControl required fullWidth margin='dense'>
-                        <InputLabel>Employee Type</InputLabel>
+                        <InputLabel>Company</InputLabel>
                         <Select
                             name='company'
                             label="Employee Type"
@@ -182,9 +254,17 @@ export default function EmployerForm() {
                         error={error}
                         data-testid="confirm-password-input"
                     />
+
+                    {error &&
+                        <Typography className='self-center' color='error'>
+                            {message}
+                        </Typography>
+                    }
                     <Button type='submit' className='bg-[#33b33d]' color='success' data-testid="submit-btns" variant='contained'>Submit</Button>
                 </Box>
             </Container>
+
+
 
         </DashboardLayout>
     )

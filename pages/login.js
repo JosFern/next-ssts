@@ -32,8 +32,6 @@ export default function Login() {
 
     const account = _.find(acc.accounts, { email: email, password: password })
 
-    console.log(account);
-
     if (!account) {
       setAccountError(true)
 

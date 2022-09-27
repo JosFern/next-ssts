@@ -52,6 +52,10 @@ export const EmployeeStore = createSlice({
             state.employees = [...state.employees, action.payload]
         },
 
+        deleteEmployee: (state, action) => {
+            state.employees.splice(action.payload, 1)
+        },
+
         setMonthlySalares: (state, action) => {
             state.monthlySalary = action.payload
         },
@@ -118,6 +122,6 @@ export const EmployeeStore = createSlice({
     }
 })
 
-export const { setEmployees, addEmployee, setMonthlySalares, computeDailyWage, computeWeekSalary, computeMonthlySalary } = EmployeeStore.actions
+export const { setEmployees, addEmployee, deleteEmployee, setMonthlySalares, computeDailyWage, computeWeekSalary, computeMonthlySalary } = EmployeeStore.actions
 
 export default EmployeeStore.reducer

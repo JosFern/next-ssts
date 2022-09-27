@@ -35,10 +35,19 @@ export const EmployerStore = createSlice({
         deleteEmployer: (state, action) => {
             const index = _.findIndex(state.employers, { accountID: action.payload })
             state.employers.splice(index, 1)
+        },
+
+        updateEmployer: (state, action) => {
+            const { firstName, lastName, email, company, id } = action.payload
+
+            const index = _.findIndex(state.employers, { accountID: id })
+
+            state.employers[index] = { ...state.employers[index], firstName, lastName, email, company }
+
         }
     }
 })
 
-export const { setEmployers, addEmployer, deleteEmployer } = EmployerStore.actions
+export const { setEmployers, addEmployer, deleteEmployer, updateEmployer } = EmployerStore.actions
 
 export default EmployerStore.reducer
