@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import _ from 'lodash';
 import { useEffect } from 'react';
 import { deleteEmployee, setEmployees } from '../../store/reducers/employee';
+import { deleteAccount } from '../../store/reducers/account';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -63,10 +64,11 @@ function Employer() {
         //sample employee data
         {
             employeeType: 'fulltime',
-            accountID: 2,
+            accountID: 5,
             employeeID: 102,
             firstName: 'jose',
             lastName: 'Basic',
+            position: 'intern',
             associatedCompany: 1,
             salaryPerHour: 10,
             dailyWage: 0,
@@ -74,24 +76,42 @@ function Employer() {
         },
         {
             employeeType: 'fulltime',
-            accountID: 1,
+            accountID: 6,
             employeeID: 101,
             firstName: 'Joselito',
             lastName: 'Basic',
+            position: 'intern',
             associatedCompany: 1,
             salaryPerHour: 15,
             dailyWage: 0,
             currMonthSal: 0
-        }
+        },
+        {
+            employeeType: 'fulltime',
+            accountID: 1,
+            employeeID: 103,
+            firstName: 'Employee',
+            lastName: 'employee',
+            position: 'developer',
+            associatedCompany: 1,
+            salaryPerHour: 20,
+            dailyWage: 0,
+            currMonthSal: 0
+        },
     ]
 
-    // useEffect(() => {
-    //     const initalizeReducers = async () => {
-    //         await dispatch(setEmployees(employees))
-    //     }
+    useEffect(() => {
+        const initalizeReducers = async () => {
+            await dispatch(setEmployees(employees))
+        }
 
-    //     initalizeReducers()
-    // }, [dispatch])
+
+    }, [dispatch])
+
+    const deleteEmployeeInfo = (accountID) => {
+        dispatch(deleteEmployee(accountID))
+        dispatch(deleteAccount(accountID))
+    }
 
     return (
         <DashboardLayout>
@@ -145,6 +165,7 @@ function Employer() {
                                 <StyledTableCell>Employee ID</StyledTableCell>
                                 <StyledTableCell>First Name</StyledTableCell>
                                 <StyledTableCell>Last Name</StyledTableCell>
+                                <StyledTableCell>Position</StyledTableCell>
                                 <StyledTableCell>Salary Per Hour</StyledTableCell>
                                 <StyledTableCell>Employee Type</StyledTableCell>
                                 <StyledTableCell>Actions</StyledTableCell>
@@ -163,13 +184,14 @@ function Employer() {
                                         {row.firstName}
                                     </StyledTableCell>
                                     <StyledTableCell >{row.lastName}</StyledTableCell>
+                                    <StyledTableCell >{row.position}</StyledTableCell>
                                     <StyledTableCell >{row.salaryPerHour}</StyledTableCell>
                                     <StyledTableCell >{row.employeeType === 'fulltime' ? 'Full Time' : 'Part Time'}</StyledTableCell>
                                     <StyledTableCell >
                                         <ButtonGroup variant="contained">
-                                            <Button className='bg-[#0e79e1]' color='info' onClick={() => router.push('/employee/' + row.id)} >Info</Button>
-                                            <Button className='bg-[#33b33d]' color='success' onClick={() => router.push('/employee/form?id=' + row.id)}>Update</Button>
-                                            <Button onClick={() => dispatch(deleteEmployee(index))} className='bg-[#dc3c18]' color='error'>Delete</Button>
+                                            <Button className='bg-[#0e79e1]' color='info' onClick={() => router.push('/employee/' + row.accountID)} >Info</Button>
+                                            <Button className='bg-[#33b33d]' color='success' onClick={() => router.push('/employee/form?id=' + row.accountID)}>Update</Button>
+                                            <Button onClick={() => deleteEmployeeInfo(row.accountID)} className='bg-[#dc3c18]' color='error'>Delete</Button>
                                         </ButtonGroup>
                                     </StyledTableCell>
                                 </StyledTableRow>

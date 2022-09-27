@@ -22,18 +22,32 @@ export const AccountStore = createSlice({
             },
             {
                 accountID: 3,
-                firstName: 'Employer1',
+                firstName: 'employer1',
                 email: 'employer1@gmail.com',
                 password: 'employer123',
                 type: 'employer'
             },
             {
                 accountID: 4,
-                firstName: 'Employer2',
+                firstName: 'employer2',
                 email: 'employer2@gmail.com',
                 password: 'employer123',
                 type: 'employer'
-            }
+            },
+            {
+                accountID: 5,
+                firstName: 'jose',
+                email: 'jose@gmail.com',
+                password: 'jose123',
+                type: 'employee'
+            },
+            {
+                accountID: 6,
+                firstName: 'Joselito',
+                email: 'joselito@gmail.com',
+                password: 'joselito123',
+                type: 'employee'
+            },
         ]
     },
     reducers: {
