@@ -9,10 +9,11 @@ import { useRouter } from 'next/router';
 import Link from 'next/link';
 import DashboardLayout from '../components/DashboardLayout'
 import { useDispatch, useSelector } from 'react-redux';
-import _ from 'lodash';
-import { deleteAccount } from '../../store/reducers/account';
-import { deleteEmployer } from '../../store/reducers/employer';
-import { deleteCompany } from '../../store/reducers/company';
+import _, { filter } from 'lodash';
+import { deleteAccount, setAccounts } from '../../store/reducers/account';
+import { deleteEmployer, setEmployers } from '../../store/reducers/employer';
+import { deleteCompany, setCompanies } from '../../store/reducers/company';
+import { useEffect } from 'react';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -52,12 +53,92 @@ function Admin() {
 
     const comp = useSelector(state => state.company)
     const emplyr = useSelector(state => state.employer)
+    const user = useSelector(state => state.logged)
+    const acc = useSelector(state => state.account)
     const dispatch = useDispatch()
 
     const handleDeleteEmployer = (id) => {
         dispatch(deleteAccount(id))
         dispatch(deleteEmployer(id))
     }
+
+    const employers = [
+        //sample employee data
+        {
+            accountID: 3,
+            firstName: 'employer1',
+            lastName: 'employer',
+            email: 'employer1@gmail.com',
+            company: 1,
+        },
+        {
+            accountID: 4,
+            firstName: 'employer2',
+            lastName: 'employer',
+            email: 'employer2@gmail.com',
+            company: 3,
+        }
+    ]
+
+    const accounts = [
+        //sample account data
+        {
+            accountID: 1,
+            firstName: 'Employee',
+            email: 'employee@gmail.com',
+            password: 'employee123',
+            type: 'employee'
+        },
+        {
+            accountID: 2,
+            firstName: 'Admin',
+            email: 'admin@gmail.com',
+            password: 'admin123',
+            type: 'admin'
+        },
+        {
+            accountID: 3,
+            firstName: 'Employer1',
+            email: 'employer1@gmail.com',
+            password: 'employer123',
+            type: 'employer'
+        },
+        {
+            accountID: 4,
+            firstName: 'Employer2',
+            email: 'employer2@gmail.com',
+            password: 'employer123',
+            type: 'employer'
+        }
+    ]
+
+    const companies = [
+        {
+            id: 1,
+            name: 'Syntactics',
+            leaves: 6,
+            accountID: 1,
+            overtimeLimit: 30
+        },
+        {
+            id: 3,
+            name: 'Lemondrop',
+            leaves: 6,
+            accountID: 3,
+            overtimeLimit: 30
+        }
+    ]
+
+    // useEffect(() => {
+    //     const initializeReducers = async () => {
+    //         await dispatch(setCompanies(companies))
+    //         // await dispatch(setAccounts(accounts))
+
+    //         // dispatch(setEmployers(employers))
+    //     }
+
+    //     initializeReducers()
+    // }, [dispatch])
 
     return (
         <DashboardLayout >
@@ -72,7 +153,7 @@ function Admin() {
 
                 <Box>
                     <Link href='../profile'>
-                        <Typography style={{ cursor: 'pointer' }} mt={2} variant='h4' margin={0} padding={0}>AdminName</Typography>
+                        <Typography style={{ cursor: 'pointer' }} mt={2} variant='h4' margin={0} padding={0}>{user.loggedIn.firstName}</Typography>
                     </Link>
                     <Typography mb={2}>Admin</Typography>
                     <Box>
@@ -117,7 +198,7 @@ function Admin() {
                                 <StyledTableCell >
                                     <ButtonGroup variant="contained" aria-label="outlined primary button group">
                                         <Button className='bg-[#33b33d]' color='success' onClick={() => router.push('/employer/form?id=' + row.id)}>Update</Button>
-                                        <Button className='bg-[#dc3c18]' color='error' onClick={() => handleDeleteEmployer(index)}>Delete</Button>
+                                        <Button className='bg-[#dc3c18]' color='error' onClick={() => handleDeleteEmployer(row.accountID)}>Delete</Button>
                                     </ButtonGroup>
                                 </StyledTableCell>
                             </StyledTableRow>
@@ -159,6 +240,40 @@ function Admin() {
                                         <Button onClick={() => dispatch(deleteCompany(index))} className='bg-[#dc3c18]' color='error'>Delete</Button>
                                     </ButtonGroup>
                                 </StyledTableCell>
+                            </StyledTableRow>
+                        ))}
+                    </TableBody>
+                </Table>
+            </TableContainer>
+
+
+            <Typography className='text-center my-4 font-bold text-2xl tracking-wide'>
+                Accounts
+            </Typography>
+            <TableContainer component={Paper} data-testid="employer-table">
+                <Table sx={{ minWidth: 700 }}>
+                    <TableHead>
+                        <TableRow>
+                            <StyledTableCell>Account ID</StyledTableCell>
+                            <StyledTableCell>Name</StyledTableCell>
+                            <StyledTableCell>Email</StyledTableCell>
+                            <StyledTableCell>Password</StyledTableCell>
+                            <StyledTableCell>Type</StyledTableCell>
+                        </TableRow>
+                    </TableHead>
+                    <TableBody>
+                        {_.map(_.filter(acc.accounts, (account) => { return account.type === 'employee' || account.type === 'employer' }), (row, index) => (
+                            <StyledTableRow
+                                key={index}
+                                sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                            >
+                                <StyledTableCell component="th" scope="row">
+                                    {row.accountID}
+                                </StyledTableCell>
+                                <StyledTableCell >{row.firstName}</StyledTableCell>
+                                <StyledTableCell >{row.email}</StyledTableCell>
+                                <StyledTableCell >{row.password}</StyledTableCell>
+                                <StyledTableCell >{row.type}</StyledTableCell>
                             </StyledTableRow>
                         ))}
                     </TableBody>

@@ -59,7 +59,7 @@ export default function EmployerForm() {
             setError(true)
         } else {
             dispatch(addEmployer({ accountID, firstName, lastName, email, company }))
-            dispatch(addAccount({ accountID, email, password, type: 'employer' }))
+            dispatch(addAccount({ accountID, firstName, email, password, type: 'employer' }))
             router.back()
         }
     }

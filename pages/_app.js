@@ -7,11 +7,15 @@ import theme from '../config/theme';
 import createEmotionCache from '../config/createEmotionCache';
 import '../styles/Home.module.css'
 import { Provider } from 'react-redux';
-import store from '../store';
+import { store } from '../store';
 import '../styles/globals.css'
+import { PersistGate } from 'redux-persist/integration/react';
+import { persistStore } from 'redux-persist';
 
 // Client-side cache, shared for the whole session of the user in the browser.
 const clientSideEmotionCache = createEmotionCache();
+
+let persistor = persistStore(store)
 
 
 export default function MyApp(props) {
@@ -27,7 +31,9 @@ export default function MyApp(props) {
       <ThemeProvider theme={theme}>
         <CssBaseline />
         <Provider store={store}>
-          <Component {...pageProps} />
+          <PersistGate loading={null} persistor={persistor}>
+            <Component {...pageProps} />
+          </PersistGate>
         </Provider>
       </ThemeProvider>
     </CacheProvider>

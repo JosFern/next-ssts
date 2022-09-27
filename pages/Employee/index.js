@@ -190,17 +190,17 @@ function Employee() {
 
             await dispatch(setCompanies(companies))
 
-            // await dispatch(setMonthlySalares(monthlySalaries))
+            await dispatch(setMonthlySalares(monthlySalaries))
 
-            // await dispatch(computeRemainingLeaves({ companyLeaves: 6, id: log.loggedIn.id }))
+            await dispatch(computeRemainingLeaves({ companyLeaves: 6, id: log.loggedIn.id }))
 
-            // await dispatch(computeTotalAbsences({ id: log.loggedIn.id, leaves: 3, companyLeaves: 6 }))
+            await dispatch(computeTotalAbsences({ id: log.loggedIn.id, leaves: 3, companyLeaves: 6 }))
 
-            // await dispatch(computeTotalOvertime({ id: log.loggedIn.id, companyOvertimeLimit: 30 }))
+            await dispatch(computeTotalOvertime({ id: log.loggedIn.id, companyOvertimeLimit: 30 }))
 
-            // await dispatch(computeDailyWage({ id: log.loggedIn.id }))
+            await dispatch(computeDailyWage({ id: log.loggedIn.id }))
 
-            // await dispatch(computeMonthlySalary({ id: log.loggedIn.id, overtime: 7, leavesRemaining: 1, totalAbsences: 5 }))
+            await dispatch(computeMonthlySalary({ id: log.loggedIn.id, overtime: 7, leavesRemaining: 1, totalAbsences: 5 }))
 
         }
 
@@ -218,12 +218,12 @@ function Employee() {
                 <Box className='flex justify-between items-center gap-3 w-full h-[140px]'>
                     <Box className='bg-[#fba600] flex p-4 rounded-md gap-4 h-full grow'>
                         <Link href='../profile'>
-                            <Avatar sx={{ bgcolor: blue[800], width: 80, height: 80, fontSize: '40px' }}>J</Avatar>
+                            <Avatar sx={{ bgcolor: blue[800], width: 80, height: 80, fontSize: '40px' }}>E</Avatar>
                         </Link>
 
                         <Box>
                             <Link href='../profile'>
-                                <Typography data-testid="name" style={{ cursor: 'pointer' }} mt={2} variant='h5' margin={0} padding={0}>{log.loggedIn.name}</Typography>
+                                <Typography data-testid="name" style={{ cursor: 'pointer' }} mt={2} variant='h5' margin={0} padding={0}>{log.loggedIn.firstName}</Typography>
                             </Link>
                             <Typography mb={2} variant='body1'>Employee</Typography>
                             <Button data-testid="request-leave" className='bg-[#0055fb] text-white hover:bg-[#001b51]' variant='contained' onClick={() => setOpen(true)}>Request leave</Button>

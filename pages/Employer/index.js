@@ -1,11 +1,10 @@
-import { Avatar, ButtonGroup, Modal, Table, TableBody, TableContainer, TableHead, TableRow, TextField } from '@mui/material'
+import { Avatar, ButtonGroup, Table, TableBody, TableContainer, TableHead, TableRow } from '@mui/material'
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
 import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography'
-import { blue, green } from '@mui/material/colors'
-import { useState } from 'react';
+import { blue } from '@mui/material/colors'
 import { Box } from '@mui/system';
 import { useRouter } from 'next/router';
 import Link from 'next/link';
@@ -13,7 +12,10 @@ import DashboardLayout from '../components/DashboardLayout'
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import MoreTimeIcon from '@mui/icons-material/MoreTime';
 import RunningWithErrorsIcon from '@mui/icons-material/RunningWithErrors';
-import { useSelector } from 'react-redux';
+import { useDispatch, useSelector } from 'react-redux';
+import _ from 'lodash';
+import { useEffect } from 'react';
+import { setEmployees } from '../../store/reducers/employee';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -52,7 +54,44 @@ function Employer() {
 
     const router = useRouter()
 
-    const emp = useSelector(state => state.employer)
+    const emplyr = useSelector(state => state.employer)
+    const user = useSelector(state => state.logged)
+    const emp = useSelector(state => state.employee)
+    const dispatch = useDispatch()
+
+    const employees = [
+        //sample employee data
+        {
+            employeeType: 'fulltime',
+            accountID: 2,
+            employeeID: 102,
+            firstName: 'jose',
+            lastName: 'Basic',
+            associatedCompany: 1,
+            salaryPerHour: 10,
+            dailyWage: 0,
+            currMonthSal: 0
+        },
+        {
+            employeeType: 'fulltime',
+            accountID: 1,
+            employeeID: 101,
+            firstName: 'Joselito',
+            lastName: 'Basic',
+            associatedCompany: 1,
+            salaryPerHour: 15,
+            dailyWage: 0,
+            currMonthSal: 0
+        }
+    ]
+
+    // useEffect(() => {
+    //     const initalizeReducers = async () => {
+    //         await dispatch(setEmployees(employees))
+    //     }
+
+    //     initalizeReducers()
+    // }, [dispatch])
 
     return (
         <DashboardLayout>
@@ -69,7 +108,7 @@ function Employer() {
 
                     <Box>
                         <Link href='../profile'>
-                            <Typography data-testid="name" style={{ cursor: 'pointer' }} mt={2} variant='h5' margin={0} padding={0}>EmployerName</Typography>
+                            <Typography data-testid="name" style={{ cursor: 'pointer' }} mt={2} variant='h5' margin={0} padding={0}>{user.loggedIn.firstName}</Typography>
                         </Link>
                         <Typography mt={2} mb={2}>Employer</Typography>
                         <Button data-testid="add-employer" className='bg-[#44bd32] text-white hover:bg-[#4cd137]' onClick={() => router.push('/employee/form')} variant='contained'>+ Add Employee</Button>
@@ -79,11 +118,11 @@ function Employer() {
 
                 <Box className='bg-[#8e44ad] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
                     <MeetingRoomIcon sx={{ width: 70, height: 70 }} />
-                    <Typography data-testid="leaves" mt={2} variant='h5' >Leaves: 2</Typography>
+                    <Typography data-testid="leaves" mt={2} variant='h5' >Leaves: 6</Typography>
                 </Box>
                 <Box className='bg-[#0097e6] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
                     <MoreTimeIcon sx={{ width: 70, height: 70 }} />
-                    <Typography data-testid="overtime-limit" mt={2} variant='h5' >Overtime Limit: 20 hrs</Typography>
+                    <Typography data-testid="overtime-limit" mt={2} variant='h5' >Overtime Limit: 30 hrs</Typography>
                 </Box>
 
                 <Box className='bg-[#d35400] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
@@ -106,24 +145,24 @@ function Employer() {
                                 <StyledTableCell>ID</StyledTableCell>
                                 <StyledTableCell>First Name</StyledTableCell>
                                 <StyledTableCell>Last Name</StyledTableCell>
-                                <StyledTableCell>Email</StyledTableCell>
+                                <StyledTableCell>Salary Per Hour</StyledTableCell>
                                 <StyledTableCell>Actions</StyledTableCell>
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {rows.map((row, index) => (
+                            {_.map(emp.employees, (row, index) => (
                                 <StyledTableRow
                                     key={index}
                                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                 >
                                     <StyledTableCell>
-                                        {row.id}
+                                        {row.employeeID}
                                     </StyledTableCell>
                                     <StyledTableCell>
-                                        {row.first}
+                                        {row.firstName}
                                     </StyledTableCell>
-                                    <StyledTableCell >{row.last}</StyledTableCell>
-                                    <StyledTableCell >{row.email}</StyledTableCell>
+                                    <StyledTableCell >{row.lastName}</StyledTableCell>
+                                    <StyledTableCell >{row.salaryPerHour}</StyledTableCell>
                                     <StyledTableCell >
                                         <ButtonGroup variant="contained">
                                             <Button className='bg-[#0e79e1]' color='info' onClick={() => router.push('/employee/' + row.id)} >Info</Button>

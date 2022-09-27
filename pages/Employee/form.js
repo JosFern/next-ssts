@@ -4,14 +4,24 @@ import { useRouter } from 'next/router';
 import DashboardLayout from '../components/DashboardLayout'
 import _ from 'lodash'
 import { useEffect, useState } from 'react';
+import { useDispatch, useSelector } from 'react-redux';
+import { addEmployee } from '../../store/reducers/employee';
+import { addAccount } from '../../store/reducers/account';
 
 export default function EmployeeForm() {
 
     const router = useRouter()
 
+    const comp = useSelector(state => state.company)
+    const acc = useSelector(state => state.account)
+    const dispatch = useDispatch()
+
     const isFormAdd = _.isEmpty(router?.query)
 
+    const [error, setError] = useState(false)
+
     const [employeeInfo, setEmployeeInfo] = useState({
+        accountID: '',
         firstName: '',
         lastName: '',
         email: '',
@@ -46,7 +56,21 @@ export default function EmployeeForm() {
 
     const handleAddEmpSubmit = (e) => {
         e.preventDefault()
-        console.log(employeeInfo);
+        setError(false)
+
+        const { accountID, firstName, lastName, email, company, employeeID, position, salaryPerHour, employeeType, password } = employeeInfo
+
+        const isExist = _.find(acc.accounts, function (account) {
+            return account.email === employeeInfo.email || account.accountID === Number(employeeInfo.accountID)
+        })
+
+        if (isExist) {
+            setError(true)
+        } else {
+            dispatch(addEmployee({ employeeType, accountID, employeeID, firstName, lastName, associatedCompany: company, salaryPerHour, dailywage: 0, currMonthSal: 0 }))
+            dispatch(addAccount({ accountID, firstName, email, password, type: 'employee' }))
+            router.back()
+        }
     }
 
     return (
@@ -58,6 +82,20 @@ export default function EmployeeForm() {
                 <Box className='w-full' component="form" onSubmit={handleAddEmpSubmit}>
                     <Box className='flex gap-1'>
                         <TextField
+                            name='accountID'
+                            type="text"
+                            label='account ID'
+                            variant="outlined"
+                            color="secondary"
+                            margin='dense'
+                            required
+                            fullWidth
+                            error={error}
+                            onChange={handleChange}
+                            value={employeeInfo.accountID}
+                            data-testid="accountID-input"
+                        />
+                        <TextField
                             name='firstName'
                             type="text"
                             label='First name'
@@ -66,6 +104,7 @@ export default function EmployeeForm() {
                             margin='dense'
                             required
                             fullWidth
+                            error={error}
                             onChange={handleChange}
                             value={employeeInfo.firstName}
                             data-testid="firstname-input"
@@ -79,6 +118,7 @@ export default function EmployeeForm() {
                             margin='dense'
                             required
                             fullWidth
+                            error={error}
                             onChange={handleChange}
                             value={employeeInfo.lastName}
                             data-testid="lastname-input"
@@ -92,6 +132,7 @@ export default function EmployeeForm() {
                             margin='dense'
                             fullWidth
                             required
+                            error={error}
                             onChange={handleChange}
                             value={employeeInfo.email}
                             data-testid="email-input"
@@ -99,19 +140,20 @@ export default function EmployeeForm() {
                     </Box>
 
                     <Box className='flex gap-1'>
-                        <TextField
-                            name='company'
-                            type="text"
-                            label='Company'
-                            variant="outlined"
-                            color="secondary"
-                            margin='dense'
-                            fullWidth
-                            required
-                            onChange={handleChange}
-                            value={employeeInfo.company}
-                            data-testid="company-input"
-                        />
+                        <FormControl required fullWidth margin='dense'>
+                            <InputLabel>Company</InputLabel>
+                            <Select
+                                name='company'
+                                label="Company"
+                                value={employeeInfo.company}
+                                onChange={handleChange}
+                                data-testid="company-input"
+                            >
+                                {_.map(comp.companies, (company) => (
+                                    <MenuItem key={company.id} value={company.accountID}>{company.name}</MenuItem>
+                                ))}
+                            </Select>
+                        </FormControl>
                         <TextField
                             name='employeeID'
                             type="text"
@@ -121,6 +163,7 @@ export default function EmployeeForm() {
                             margin='dense'
                             fullWidth
                             required
+                            error={error}
                             onChange={handleChange}
                             value={employeeInfo.employeeID}
                             data-testid="employeeID-input"
@@ -138,6 +181,7 @@ export default function EmployeeForm() {
                             margin='dense'
                             fullWidth
                             required
+                            error={error}
                             onChange={handleChange}
                             value={employeeInfo.position}
                             data-testid="position-input"
@@ -152,6 +196,7 @@ export default function EmployeeForm() {
                             margin='dense'
                             fullWidth
                             required
+                            error={error}
                             onChange={handleChange}
                             value={employeeInfo.salaryPerHour}
                             data-testid="salaryPerHour-input"
@@ -184,6 +229,7 @@ export default function EmployeeForm() {
                         margin='dense'
                         fullWidth
                         required
+                        error={error}
                         onChange={handleChange}
                         value={employeeInfo.password}
                         data-testid="password-input"
@@ -197,6 +243,7 @@ export default function EmployeeForm() {
                         margin='dense'
                         fullWidth
                         required
+                        error={error}
                         onChange={handleChange}
                         value={employeeInfo.confirmPassword}
                         data-testid="confirmPassword-input"

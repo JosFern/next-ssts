@@ -10,8 +10,19 @@ export const EmployeeStore = createSlice({
             {
                 employeeType: 'fulltime',
                 accountID: 2,
-                employeeIDNum: 102,
+                employeeID: 102,
                 firstName: 'jose',
+                lastName: 'Basic',
+                associatedCompany: 1,
+                salaryPerHour: 10,
+                dailyWage: 0,
+                currMonthSal: 0
+            },
+            {
+                employeeType: 'fulltime',
+                accountID: 1,
+                employeeID: 101,
+                firstName: 'Joselito',
                 lastName: 'Basic',
                 associatedCompany: 1,
                 salaryPerHour: 15,
@@ -20,10 +31,10 @@ export const EmployeeStore = createSlice({
             },
             {
                 employeeType: 'fulltime',
-                accountID: 1,
-                employeeIDNum: 101,
-                firstName: 'Joselito',
-                lastName: 'Basic',
+                accountID: 3,
+                employeeID: 103,
+                firstName: 'Employee',
+                lastName: 'employee',
                 associatedCompany: 1,
                 salaryPerHour: 15,
                 dailyWage: 0,
@@ -35,6 +46,10 @@ export const EmployeeStore = createSlice({
     reducers: {
         setEmployees: (state, action) => {
             state.employees = action.payload
+        },
+
+        addEmployee: (state, action) => {
+            state.employees = [...state.employees, action.payload]
         },
 
         setMonthlySalares: (state, action) => {
@@ -103,6 +118,6 @@ export const EmployeeStore = createSlice({
     }
 })
 
-export const { setEmployees, setMonthlySalares, computeDailyWage, computeWeekSalary, computeMonthlySalary } = EmployeeStore.actions
+export const { setEmployees, addEmployee, setMonthlySalares, computeDailyWage, computeWeekSalary, computeMonthlySalary } = EmployeeStore.actions
 
 export default EmployeeStore.reducer

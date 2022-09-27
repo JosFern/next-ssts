@@ -33,7 +33,8 @@ export const EmployerStore = createSlice({
         },
 
         deleteEmployer: (state, action) => {
-            state.employers.splice(action.payload, 1)
+            const index = _.findIndex(state.employers, { accountID: action.payload })
+            state.employers.splice(index, 1)
         }
     }
 })
