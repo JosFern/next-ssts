@@ -13,10 +13,12 @@ import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import MoreTimeIcon from '@mui/icons-material/MoreTime';
 import RunningWithErrorsIcon from '@mui/icons-material/RunningWithErrors';
 import { useDispatch, useSelector } from 'react-redux';
-import _ from 'lodash';
-import { useEffect } from 'react';
+import _, { upperCase } from 'lodash';
+import { useEffect, useState } from 'react';
 import { deleteEmployee, setEmployees } from '../../store/reducers/employee';
 import { deleteAccount } from '../../store/reducers/account';
+import { setCompanies, setCompany } from '../../store/reducers/company';
+import BusinessIcon from '@mui/icons-material/Business';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -58,6 +60,10 @@ function Employer() {
     const emplyr = useSelector(state => state.employer)
     const user = useSelector(state => state.logged)
     const emp = useSelector(state => state.employee)
+    const comp = useSelector(state => state.company)
+
+
+
     const dispatch = useDispatch()
 
     const employees = [
@@ -89,7 +95,6 @@ function Employer() {
         {
             employeeType: 'fulltime',
             accountID: 1,
-            employeeID: 103,
             firstName: 'Employee',
             lastName: 'employee',
             position: 'developer',
@@ -102,9 +107,17 @@ function Employer() {
 
     useEffect(() => {
         const initalizeReducers = async () => {
-            await dispatch(setEmployees(employees))
+            // await dispatch(setEmployees(employees))
+
+            const currEmployer = _.find(emplyr.employers, { accountID: user.loggedIn.id })
+
+            console.log(currEmployer);
+            console.log(user.loggedIn.id);
+
+            dispatch(setCompany(currEmployer?.company))
         }
 
+        initalizeReducers()
 
     }, [dispatch])
 
@@ -123,7 +136,7 @@ function Employer() {
 
                 <Box className='bg-[#fba600] flex p-4 rounded-md gap-4 h-full'>
                     <Link href='../profile'>
-                        <Avatar sx={{ bgcolor: blue[800], width: 100, height: 100, fontSize: '40px' }}>E</Avatar>
+                        <Avatar sx={{ bgcolor: blue[800], width: 100, height: 100, fontSize: '40px' }}>{upperCase(user.loggedIn.firstName[0])}</Avatar>
                     </Link>
 
                     <Box>
@@ -138,16 +151,16 @@ function Employer() {
 
                 <Box className='bg-[#8e44ad] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
                     <MeetingRoomIcon sx={{ width: 70, height: 70 }} />
-                    <Typography data-testid="leaves" mt={2} variant='h5' >Leaves: 6</Typography>
+                    <Typography data-testid="leaves" mt={2} variant='h5' >Leaves: {comp.company?.leaves}</Typography>
                 </Box>
                 <Box className='bg-[#0097e6] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
                     <MoreTimeIcon sx={{ width: 70, height: 70 }} />
-                    <Typography data-testid="overtime-limit" mt={2} variant='h5' >Overtime Limit: 30 hrs</Typography>
+                    <Typography data-testid="overtime-limit" mt={2} variant='h5' >Overtime Limit: {comp.company?.overtimeLimit} hrs</Typography>
                 </Box>
 
                 <Box className='bg-[#d35400] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                    <RunningWithErrorsIcon sx={{ width: 70, height: 70 }} />
-                    <Typography data-testid="absent-limit" mt={2} variant='h5' >Absent Limit: 2</Typography>
+                    <BusinessIcon sx={{ width: 70, height: 70 }} />
+                    <Typography data-testid="absent-limit" mt={2} variant='h5' >{comp.company?.name}</Typography>
                 </Box>
 
 
@@ -172,7 +185,7 @@ function Employer() {
                             </TableRow>
                         </TableHead>
                         <TableBody>
-                            {_.map(emp.employees, (row, index) => (
+                            {_.map(_.filter(emp.employees, { associatedCompany: comp.company?.accountID }), (row, index) => (
                                 <StyledTableRow
                                     key={index}
                                     sx={{ '&:last-child td, &:last-child th': { border: 0 } }}

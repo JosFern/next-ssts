@@ -18,11 +18,24 @@ export const CompanyStore = createSlice({
                 accountID: 3,
                 overtimeLimit: 30
             }
-        ]
+        ],
+        company: {
+            id: 0,
+            name: '',
+            leaves: 0,
+            accountID: 0,
+            overtimeLimit: 0
+        }
     },
     reducers: {
         setCompanies: (state, action) => {
             state.companies = action.payload
+        },
+
+        setCompany: (state, action) => {
+            const index = _.findIndex(state.companies, { accountID: action.payload })
+
+            state.company = state.companies[index]
         },
 
         addCompany: (state, action) => {
@@ -43,6 +56,6 @@ export const CompanyStore = createSlice({
     }
 })
 
-export const { setCompanies, addCompany, deleteCompany, updateCompany } = CompanyStore.actions
+export const { setCompanies, setCompany, addCompany, deleteCompany, updateCompany } = CompanyStore.actions
 
 export default CompanyStore.reducer

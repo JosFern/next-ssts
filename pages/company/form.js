@@ -35,15 +35,15 @@ export default function CompanyForm() {
 
             const comp = _.find(com.companies, { accountID: Number(router?.query?.id) })
 
-            setOrigName(comp.name) //FOR VALIDATION IF NAME IS STILL THE SAME
+            setOrigName(comp?.name) //FOR VALIDATION IF NAME IS STILL THE SAME
 
             setCompany({
                 ...company,
-                id: comp.id,
-                accountID: comp.accountID,
-                name: comp.name,
-                leaves: comp.leaves,
-                overtimeLimit: comp.overtimeLimit
+                id: comp?.id,
+                accountID: comp?.accountID,
+                name: comp?.name,
+                leaves: comp?.leaves,
+                overtimeLimit: comp?.overtimeLimit
             })
         }
     }, [])
@@ -86,7 +86,7 @@ export default function CompanyForm() {
         e.preventDefault()
         setError(false)
 
-        const { accountID, name, leaves, overtimeLimit } = company
+        const { id, accountID, name, leaves, overtimeLimit } = company
 
         const valid = validation()
 
@@ -95,7 +95,14 @@ export default function CompanyForm() {
             if (valid !== 'ok') {
                 setError(true)
             } else {
-                dispatch(addCompany(company))
+                dispatch(addCompany({
+                    id: Number(id),
+                    accountID: Number(accountID),
+                    leaves: Number(leaves),
+                    overtimeLimit: Number(overtimeLimit),
+                    name,
+
+                }))
                 router.back()
             }
 
@@ -104,7 +111,13 @@ export default function CompanyForm() {
             if (valid !== 'ok') {
                 setError(true)
             } else {
-                dispatch(updateCompany({ id: accountID, name, leaves, overtimeLimit }))
+                dispatch(updateCompany({
+                    id: Number(id),
+                    accountID: Number(accountID),
+                    name,
+                    leaves: Number(leaves),
+                    overtimeLimit: Number(overtimeLimit)
+                }))
                 router.back()
             }
         }

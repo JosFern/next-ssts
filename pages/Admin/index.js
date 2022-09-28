@@ -37,16 +37,6 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     },
 }));
 
-
-function createData(id, first, last, email, position, Salary, password, companyName) {
-    return { id, first, last, email, position, Salary, password, companyName };
-}
-
-const rows = [
-    createData(1, 'Employer', 'main', 'employer1@gmail.com', 'ice cream', 20, '123123123', 'Lemondrop'),
-    createData(2, 'main', 'Employer', 'employer2@gmail.com', 'ice cream', 20, '123123123', 'Workbean'),
-];
-
 function Admin() {
 
     const router = useRouter()
@@ -114,9 +104,26 @@ function Admin() {
         },
     ]
 
+    const companies = [
+        {
+            id: 1,
+            name: 'Syntactics',
+            leaves: 6,
+            accountID: 1,
+            overtimeLimit: 30
+        },
+        {
+            id: 3,
+            name: 'Lemondrop',
+            leaves: 6,
+            accountID: 3,
+            overtimeLimit: 30
+        }
+    ]
+
     // useEffect(() => {
     //     const initializeReducers = async () => {
-    //         // await dispatch(setCompanies(companies))
+    //         await dispatch(setCompanies(companies))
     //         await dispatch(setAccounts(accounts))
 
     //         // dispatch(setEmployers(employers))

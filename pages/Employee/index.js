@@ -147,14 +147,14 @@ function Employee() {
             id: 1,
             name: 'Lemondrop',
             leaves: 6,
-            accountId: 101,
+            accountID: 101,
             overtimeLimit: 30
         },
         {
             id: 2,
             name: 'Workbean',
             leaves: 6,
-            accountId: 102,
+            accountID: 102,
             overtimeLimit: 30
         }
     ]
@@ -188,7 +188,7 @@ function Employee() {
 
             await dispatch(setOvertime(overtimes))
 
-            await dispatch(setCompanies(companies))
+            // await dispatch(setCompanies(companies))
 
             await dispatch(setMonthlySalares(monthlySalaries))
 

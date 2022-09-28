@@ -41,6 +41,9 @@ export default function EmployerForm() {
             const employer = _.find(emp.employers, { accountID: Number(router?.query?.id) })
             const passInfo = _.find(acc.accounts, { accountID: Number(router?.query?.id) })
 
+            console.log(emp.employers);
+            console.log(acc.accounts);
+
             setOrigEmail(employer.email) //FOR VALIDATION IF EMAIL IS STILL THE SAME
 
             setEmployerInfo({

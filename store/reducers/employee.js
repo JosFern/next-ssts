@@ -43,7 +43,18 @@ export const EmployeeStore = createSlice({
                 currMonthSal: 0
             },
         ],
-        monthlySalary: []
+        monthlySalary: [],
+        employee: {
+            employeeType: '',
+            accountID: 0,
+            firstName: '',
+            lastName: '',
+            position: '',
+            associatedCompany: 0,
+            salaryPerHour: 0,
+            dailyWage: 0,
+            currMonthSal: 0
+        }
     },
     reducers: {
         setEmployees: (state, action) => {
