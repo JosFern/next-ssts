@@ -83,7 +83,7 @@ function Employer() {
         {
             employeeType: 'fulltime',
             accountID: 6,
-            employeeID: 101,
+            employeeID: 103,
             firstName: 'Joselito',
             lastName: 'Basic',
             position: 'intern',
@@ -95,6 +95,7 @@ function Employer() {
         {
             employeeType: 'fulltime',
             accountID: 1,
+            employeeID: 101,
             firstName: 'Employee',
             lastName: 'employee',
             position: 'developer',
@@ -110,9 +111,6 @@ function Employer() {
             // await dispatch(setEmployees(employees))
 
             const currEmployer = _.find(emplyr.employers, { accountID: user.loggedIn.id })
-
-            console.log(currEmployer);
-            console.log(user.loggedIn.id);
 
             dispatch(setCompany(currEmployer?.company))
         }

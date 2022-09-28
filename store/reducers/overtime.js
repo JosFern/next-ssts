@@ -41,7 +41,7 @@ export const Overtime = createSlice({
 
             let totalOvertime = 0;
 
-            _.forEach(monthOvertime, function (overtime) {
+            _.map(monthOvertime, function (overtime) {
                 totalOvertime += differenceInHours(parseISO(overtime.dateEnded), parseISO(overtime.dateStarted))
             })
 

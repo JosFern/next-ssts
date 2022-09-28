@@ -128,7 +128,7 @@ export default function EmployeeForm() {
                     employeeID: Number(employeeID),
                     firstName,
                     lastName,
-                    associatedCompany: comp.company.accountID,
+                    associatedCompany: Number(comp.company.accountID),
                     salaryPerHour: Number(salaryPerHour),
                     position,
                     dailywage: 0,
