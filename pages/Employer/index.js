@@ -11,7 +11,6 @@ import Link from 'next/link';
 import DashboardLayout from '../components/DashboardLayout'
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import MoreTimeIcon from '@mui/icons-material/MoreTime';
-import RunningWithErrorsIcon from '@mui/icons-material/RunningWithErrors';
 import { useDispatch, useSelector } from 'react-redux';
 import _, { upperCase } from 'lodash';
 import { useEffect, useState } from 'react';
@@ -130,9 +129,9 @@ function Employer() {
             const employee = _.find(emp.employees, { accountID: leave.employeeId })
             if (employee?.associatedCompany === comp.company.accountID) {
                 return { ...leave, name: employee.firstName }
-            } else {
-                return null
             }
+            return null
+
         }).filter((leave) => { return leave }).value()
 
         // const getAssocCompany = _.filter(leaves, (leave) => {
@@ -149,9 +148,8 @@ function Employer() {
             const employee = _.find(emp.employees, { accountID: overtime.employeeId })
             if (employee?.associatedCompany === comp.company.accountID) {
                 return { ...overtime, name: employee.firstName }
-            } else {
-                return null
             }
+            return null
         }).filter((overtime) => { return overtime }).value()
 
         // const getAssocCompany = _.filter(overtimes, (overtime) => {

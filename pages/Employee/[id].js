@@ -138,62 +138,42 @@ export default function EmployeeInfo() {
             data-testid="employee-info"
             className='flex flex-col justify-between items-center gap-3 text-white'
           >
-            <Box className='flex justify-between items-center gap-3 w-full h-[150px]'>
 
-              <Box className='bg-[#fba600] flex p-4 rounded-md gap-4 h-full'>
+            <Box className='flex justify-between items-center gap-3 w-full h-[140px]'>
+
+              <Box className='bg-[#fba600] flex justify-center items-center p-4 rounded-md gap-4 h-full'>
 
                 <Avatar sx={{ bgcolor: blue[800], width: 100, height: 100, fontSize: '40px' }} />
 
-                <Box>
-                  <Typography mt={2} variant="h5" >Name: {emp.employee.firstName}</Typography>
-                  <Typography mt={2} >Position: {emp.employee.position}</Typography>
-                  <Typography mt={2} >Type: {emp.employee.employeeType}</Typography>
-
+                <Box className='flex flex-col py-4 gap-1'>
+                  <Typography variant="h5" >Name: {emp.employee.firstName}</Typography>
+                  <Typography  >Position: {emp.employee.position}</Typography>
+                  <Typography  >Type: {emp.employee.employeeType}</Typography>
                   <Button data-testid="add-employer" onClick={() => setAbsentModal(true)} className='bg-[#0055fb] text-white hover:bg-[#001b51]' variant='contained'>Set Absent</Button>
                 </Box>
+
               </Box>
 
-              <Box className='bg-[#44bd32] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                <LocalAtmIcon sx={{ width: 60, height: 60 }} />
-                <Typography mt={2} variant='h6' >Salary/Hour: {emp.employee.salaryPerHour}</Typography>
-              </Box>
-              <Box className='bg-[#8e44ad] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                <MeetingRoomIcon sx={{ width: 60, height: 60 }} />
-                <Typography mt={2} variant='h6' >Remaining Leaves: {leave.employee.remainingLeaves}</Typography>
-              </Box>
+              <Box className='bg-[#16a085] flex flex-col justify-center items-start grow p-4 rounded-md h-full'>
 
-              <Box className='bg-[#d35400] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                <RunningWithErrorsIcon sx={{ width: 60, height: 60 }} />
-                <Typography mt={2} variant='h6' >Absences: {abs.employee.totalAbsences}</Typography>
+                <Typography variant='h6' >Salary/Hour: ${emp.employee.salaryPerHour}</Typography>
+                <Typography data-testid="daily-wage" variant='h6' >Daily Wage: ${emp.employee.dailyWage}</Typography>
+                <Typography data-testid="monthly-salary" variant='h6' >Monthly Salary: ${emp.employee.currMonthSal}</Typography>
+
               </Box>
 
-            </Box>
+              <Box className='bg-[#8e44ad] flex flex-col justify-center items-start grow p-4 rounded-md h-full'>
+                <Typography data-testid="remaining-leaves" variant='h6' >Leaves: {comp.company.leaves - leave.employee.remainingLeaves} days</Typography>
+                <Typography variant='h6' >Remaining: {leave.employee.remainingLeaves} days</Typography>
 
-            {/*----------------------SECOND ROW EMP INFO--------------------------- */}
-
-            <Box className='flex justify-between items-center gap-3 w-full  h-[140px]'>
-              <Box className='bg-[#8e44ad] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                <MeetingRoomIcon sx={{ width: 60, height: 60 }} />
-                <Typography data-testid="remaining-leaves" mt={2} variant='h6' >Leaves: {comp.company.leaves - leave.employee.remainingLeaves}</Typography>
               </Box>
 
-              <Box className='bg-[#0097e6] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                <MoreTimeIcon sx={{ width: 60, height: 60 }} />
-                <Typography data-testid="overtime" mt={2} variant='h6' >Overtime: {ot.employee.totalOvertime}</Typography>
-              </Box>
-
-              <Box className='bg-[#192a56] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                <PaidIcon sx={{ width: 60, height: 60 }} />
-                <Typography data-testid="daily-wage" mt={2} variant='h6' >Daily Wage: {emp.employee.dailyWage}</Typography>
-              </Box>
-
-              <Box className='bg-[#16a085] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                <AccountBalanceIcon sx={{ width: 60, height: 60 }} />
-                <Typography data-testid="monthly-salary" mt={2} variant='h6' >Monthly Salary: {emp.employee.currMonthSal}</Typography>
+              <Box className='bg-[#d35400] flex flex-col justify-center items-start grow p-4 rounded-md h-full'>
+                <Typography data-testid="overtime" variant='h6' >Overtime: {ot.employee.totalOvertime} hrs</Typography>
+                <Typography variant='h6' >Absences: {abs.employee.totalAbsences} days</Typography>
               </Box>
 
             </Box>
-
 
           </Box>
 

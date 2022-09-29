@@ -5,10 +5,10 @@ export const loggedStore = createSlice({
     name: 'logged',
     initialState: {
         loggedIn: {
-            id: 1,
-            firstName: 'Joselito',
-            email: 'joselito@gmail.com',
-            role: 'employee'
+            id: 0,
+            firstName: '',
+            email: '',
+            role: ''
         }
     },
     reducers: {

@@ -2,11 +2,6 @@ import Typography from '@mui/material/Typography'
 import Box from '@mui/material/Box';
 import TextField from '@mui/material/TextField'
 import Button from '@mui/material/Button'
-import Radio from '@mui/material/Radio'
-import RadioGroup from '@mui/material/RadioGroup'
-import FormControlLabel from '@mui/material/FormControlLabel'
-import FormControl from '@mui/material/FormControl'
-import FormLabel from '@mui/material/FormLabel'
 import { useState } from 'react';
 import { useRouter } from 'next/router';
 import { Container } from '@mui/material';
@@ -38,6 +33,8 @@ export default function Login() {
     } else {
 
       dispatch(setLogged({ id: account.accountID, firstName: account.firstName, email: email, role: account.type }))
+
+      // router.push(`/dashboard`)
 
       if (account.type === 'employer') router.push(`/dashboard`)
 

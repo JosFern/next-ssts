@@ -1,8 +1,5 @@
-import { Avatar, ButtonGroup, Box, Table, TableBody, TableContainer, TableHead, TableRow, Tab, Tabs } from '@mui/material'
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
+import { Avatar, Box, Tab, Tabs } from '@mui/material'
 import Button from '@mui/material/Button';
-import { styled } from '@mui/material/styles';
-import Paper from '@mui/material/Paper';
 import Typography from '@mui/material/Typography'
 import { green } from '@mui/material/colors'
 import { useRouter } from 'next/router';
@@ -14,28 +11,11 @@ import { deleteAccount, setAccounts } from '../../store/reducers/account';
 import { deleteEmployer, setEmployers } from '../../store/reducers/employer';
 import { deleteCompany, setCompanies } from '../../store/reducers/company';
 import { useEffect, useState } from 'react';
-
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-        backgroundColor: '#192a56',
-        color: theme.palette.common.white,
-        textAlign: 'center'
-    },
-    [`&.${tableCellClasses.body}`]: {
-        fontSize: 14,
-        textAlign: 'center'
-    },
-}));
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    '&:nth-of-type(odd)': {
-        backgroundColor: theme.palette.action.hover,
-    },
-    // hide last border
-    '&:last-child td, &:last-child th': {
-        border: 0,
-    },
-}));
+import EmployerTable from '../components/EmpoloyerTable';
+import CompanyTable from '../components/CompanyTable';
+import AccountsTable from '../components/AccountsTable';
+import accounts from '../../_sampleData/account';
+import companies from '../../_sampleData/company';
 
 function Admin() {
 
@@ -58,69 +38,6 @@ function Admin() {
         dispatch(deleteEmployer(id))
     }
 
-    const accounts = [
-        //sample account data
-        {
-            accountID: 1,
-            firstName: 'Employee',
-            email: 'employee@gmail.com',
-            password: 'employee123',
-            type: 'employee'
-        },
-        {
-            accountID: 2,
-            firstName: 'Admin',
-            email: 'admin@gmail.com',
-            password: 'admin123',
-            type: 'admin'
-        },
-        {
-            accountID: 3,
-            firstName: 'employer1',
-            email: 'employer1@gmail.com',
-            password: 'employer123',
-            type: 'employer'
-        },
-        {
-            accountID: 4,
-            firstName: 'employer2',
-            email: 'employer2@gmail.com',
-            password: 'employer123',
-            type: 'employer'
-        },
-        {
-            accountID: 5,
-            firstName: 'jose',
-            email: 'jose@gmail.com',
-            password: 'jose123',
-            type: 'employee'
-        },
-        {
-            accountID: 6,
-            firstName: 'Joselito',
-            email: 'joselito@gmail.com',
-            password: 'joselito123',
-            type: 'employee'
-        },
-    ]
-
-    const companies = [
-        {
-            id: 1,
-            name: 'Syntactics',
-            leaves: 6,
-            accountID: 1,
-            overtimeLimit: 30
-        },
-        {
-            id: 3,
-            name: 'Lemondrop',
-            leaves: 6,
-            accountID: 3,
-            overtimeLimit: 30
-        }
-    ]
-
     // useEffect(() => {
     //     const initializeReducers = async () => {
     //         await dispatch(setCompanies(companies))
@@ -133,6 +50,17 @@ function Admin() {
 
     //     console.log('useeffect checker');
     // }, [dispatch])
+
+
+    const getEmployerCompany = (emplyrs) => {
+
+        const getAssocCompany = _.map(emplyrs, (emplyr) => {
+            const company = _.find(comp.companies, { accountID: emplyr.company })
+            return { ...emplyr, companyName: company.name }
+        })
+
+        return getAssocCompany;
+    }
 
     return (
         <DashboardLayout >
@@ -172,109 +100,16 @@ function Admin() {
                 </Box>
                 <Box>
                     {tabIndex === 0 && (
-                        <TableContainer component={Paper} data-testid="employer-table">
-                            <Table sx={{ minWidth: 700 }}>
-                                <TableHead>
-                                    <TableRow>
-                                        <StyledTableCell>Account ID</StyledTableCell>
-                                        <StyledTableCell>First Name</StyledTableCell>
-                                        <StyledTableCell>Last Name</StyledTableCell>
-                                        <StyledTableCell>Email</StyledTableCell>
-                                        <StyledTableCell>Company name</StyledTableCell>
-                                        <StyledTableCell>Actions</StyledTableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {_.map(emplyr.employers, (row, index) => (
-                                        <StyledTableRow
-                                            key={index}
-                                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                        >
-                                            <StyledTableCell component="th" scope="row">
-                                                {row.accountID}
-                                            </StyledTableCell>
-                                            <StyledTableCell >{row.firstName}</StyledTableCell>
-                                            <StyledTableCell >{row.lastName}</StyledTableCell>
-                                            <StyledTableCell >{row.email}</StyledTableCell>
-                                            <StyledTableCell >{row.company}</StyledTableCell>
-                                            <StyledTableCell >
-                                                <ButtonGroup variant="contained" aria-label="outlined primary button group">
-                                                    <Button className='bg-[#33b33d]' color='success' onClick={() => router.push('/employer/form?id=' + row.accountID)}>Update</Button>
-                                                    <Button className='bg-[#dc3c18]' color='error' onClick={() => handleDeleteEmployer(row.accountID)}>Delete</Button>
-                                                </ButtonGroup>
-                                            </StyledTableCell>
-                                        </StyledTableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                        // ---------------EMPLOYERS TABLE------------------
+                        <EmployerTable employers={getEmployerCompany(emplyr.employers)} deleteEmployer={handleDeleteEmployer} />
                     )}
                     {tabIndex === 1 && (
-                        <TableContainer component={Paper} data-testid="employer-table">
-                            <Table sx={{ minWidth: 700 }}>
-                                <TableHead>
-                                    <TableRow>
-                                        <StyledTableCell>Account ID</StyledTableCell>
-                                        <StyledTableCell>Company name</StyledTableCell>
-                                        <StyledTableCell>Leaves</StyledTableCell>
-                                        <StyledTableCell>Overtime Limit</StyledTableCell>
-                                        <StyledTableCell>Actions</StyledTableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {_.map(comp.companies, (row, index) => (
-                                        <StyledTableRow
-                                            key={index}
-                                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                        >
-                                            <StyledTableCell component="th" scope="row">
-                                                {row.accountID}
-                                            </StyledTableCell>
-                                            <StyledTableCell >{row.name}</StyledTableCell>
-                                            <StyledTableCell >{row.leaves}</StyledTableCell>
-                                            <StyledTableCell >{row.overtimeLimit}</StyledTableCell>
-                                            <StyledTableCell >
-                                                <ButtonGroup variant="contained" aria-label="outlined primary button group">
-                                                    <Button className='bg-[#33b33d]' color='success' onClick={() => router.push('/company/form?id=' + row.accountID)}>Update</Button>
-                                                    <Button onClick={() => dispatch(deleteCompany(index))} className='bg-[#dc3c18]' color='error'>Delete</Button>
-                                                </ButtonGroup>
-                                            </StyledTableCell>
-                                        </StyledTableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                        // ---------------COMPANIES TABLE------------------
+                        <CompanyTable companies={comp.companies} />
                     )}
                     {tabIndex === 2 && (
-                        <TableContainer component={Paper} data-testid="employer-table">
-                            <Table sx={{ minWidth: 700 }}>
-                                <TableHead>
-                                    <TableRow>
-                                        <StyledTableCell>Account ID</StyledTableCell>
-                                        <StyledTableCell>Name</StyledTableCell>
-                                        <StyledTableCell>Email</StyledTableCell>
-                                        <StyledTableCell>Password</StyledTableCell>
-                                        <StyledTableCell>Type</StyledTableCell>
-                                    </TableRow>
-                                </TableHead>
-                                <TableBody>
-                                    {_.map(_.filter(acc.accounts, (account) => { return account.type === 'employee' || account.type === 'employer' }), (row, index) => (
-                                        <StyledTableRow
-                                            key={index}
-                                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                        >
-                                            <StyledTableCell component="th" scope="row">
-                                                {row.accountID}
-                                            </StyledTableCell>
-                                            <StyledTableCell >{row.firstName}</StyledTableCell>
-                                            <StyledTableCell >{row.email}</StyledTableCell>
-                                            <StyledTableCell >{row.password}</StyledTableCell>
-                                            <StyledTableCell >{row.type}</StyledTableCell>
-                                        </StyledTableRow>
-                                    ))}
-                                </TableBody>
-                            </Table>
-                        </TableContainer>
+                        // ---------------ACCOUNTS TABLE------------------
+                        <AccountsTable accounts={acc.accounts} />
                     )}
                 </Box>
             </Box>
@@ -285,71 +120,3 @@ function Admin() {
 }
 
 export default Admin
-
-// const employers = [
-//     //sample employee data
-//     {
-//         accountID: 3,
-//         firstName: 'employer1',
-//         lastName: 'employer',
-//         email: 'employer1@gmail.com',
-//         company: 1,
-//     },
-//     {
-//         accountID: 4,
-//         firstName: 'employer2',
-//         lastName: 'employer',
-//         email: 'employer2@gmail.com',
-//         company: 3,
-//     }
-// ]
-
-// const accounts = [
-//     //sample account data
-//     {
-//         accountID: 1,
-//         firstName: 'Employee',
-//         email: 'employee@gmail.com',
-//         password: 'employee123',
-//         type: 'employee'
-//     },
-//     {
-//         accountID: 2,
-//         firstName: 'Admin',
-//         email: 'admin@gmail.com',
-//         password: 'admin123',
-//         type: 'admin'
-//     },
-//     {
-//         accountID: 3,
-//         firstName: 'employer1',
-//         email: 'employer1@gmail.com',
-//         password: 'employer123',
-//         type: 'employer'
-//     },
-//     {
-//         accountID: 4,
-//         firstName: 'employer2',
-//         email: 'employer2@gmail.com',
-//         password: 'employer123',
-//         type: 'employer'
-//     }
-// ]
-
-// const companies = [
-//     {
-//         id: 1,
-//         name: 'Syntactics',
-//         leaves: 6,
-//         accountID: 1,
-//         overtimeLimit: 30
-//     },
-//     {
-//         id: 3,
-//         name: 'Lemondrop',
-//         leaves: 6,
-//         accountID: 3,
-//         overtimeLimit: 30
-//     }
-// ]
-

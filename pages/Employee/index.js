@@ -150,8 +150,6 @@ function Employee() {
 
         }
 
-        console.log(overTime.requestOvertime);
-
 
         initiateReducers()
     }, [dispatch, log, absence.employee.totalAbsences, comp.companies, emp.employees, leave.employee.remainingLeaves, overTime.employee.totalOvertime])
@@ -166,69 +164,44 @@ function Employee() {
                 >
                     {/*----------------------FIRST ROW EMP INFO--------------------------- */}
                     <Box className='flex justify-between items-center gap-3 w-full h-[140px]'>
-                        <Box className='bg-[#fba600] flex p-4 rounded-md gap-4 h-full grow'>
+                        <Box className='bg-[#fba600] justify-center items-center flex p-4 rounded-md gap-3 h-full'>
                             <Link href='../profile'>
                                 <Avatar sx={{ bgcolor: blue[800], width: 80, height: 80, fontSize: '40px' }}>E</Avatar>
                             </Link>
 
-                            <Box>
+                            <Box className='flex flex-col gap-2'>
                                 <Link href='../profile'>
-                                    <Typography data-testid="name" style={{ cursor: 'pointer' }} mt={2} variant='h5' margin={0} padding={0}>{log.loggedIn.firstName}</Typography>
+                                    <Typography data-testid="name" style={{ cursor: 'pointer' }} variant='h5' margin={0} padding={0}>{log.loggedIn.firstName}</Typography>
                                 </Link>
-                                <Typography mb={2} variant='body1'>Employee</Typography>
-                                <Box className='flex gap-3'>
-                                    <Button data-testid="request-leave" className='bg-[#0055fb] text-white hover:bg-[#001b51]' variant='contained' onClick={() => setLeaveRequestModal(true)}>Request leave</Button>
+                                <Typography  >{emp.employee.position}</Typography>
+                                <Typography  >{emp.employee.employeeType}</Typography>
 
-                                    <Button data-testid="request-leave" className='bg-[#0055fb] text-white hover:bg-[#001b51]' variant='contained' onClick={() => setOTRequestModal(true)}>Request overtime</Button>
+                            </Box>
 
-                                </Box>
+                            <Box className='flex flex-col gap-2'>
+                                <Button data-testid="request-leave" className='bg-[#0055fb] text-white hover:bg-[#001b51]' disabled={leave.employee.remainingLeaves <= 0} variant='contained' onClick={() => setLeaveRequestModal(true)}>Request leave</Button>
+
+                                <Button data-testid="request-leave" className='bg-[#0055fb] text-white hover:bg-[#001b51]' variant='contained' onClick={() => setOTRequestModal(true)}>Request overtime</Button>
 
                             </Box>
 
                         </Box>
 
-                        <Box className='bg-[#8e44ad] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                            <MeetingRoomIcon sx={{ width: 60, height: 60 }} />
-                            <Typography data-testid="leaves" mt={2} variant='h6' >Leaves: {6 - leave.employee.remainingLeaves}</Typography>
+                        <Box className='bg-[#16a085] flex flex-col gap-2 justify-center items-start grow p-4 rounded-md h-full'>
+                            <Typography data-testid="salary-per-hour" variant='h6' >Salary/Hour: ${emp.employees[employeeInfoIndex].salaryPerHour}</Typography>
+                            <Typography data-testid="daily-wage" variant='h6' >Daily Wage: ${emp.employees[employeeInfoIndex].dailyWage}</Typography>
+                            <Typography data-testid="monthly-salary" variant='h6' >Monthly Salary: ${emp.employees[employeeInfoIndex].currMonthSal}</Typography>
                         </Box>
 
-                        <Box className='bg-[#d35400] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                            <RunningWithErrorsIcon sx={{ width: 60, height: 60 }} />
-                            <Typography data-testid="absences" mt={2} variant='h6' >Absences: {absence.employee.totalAbsences}</Typography>
+                        <Box className='bg-[#8e44ad] flex flex-col gap-2 justify-center items-start grow p-4 rounded-md h-full'>
+                            <Typography data-testid="leaves" variant='h6' >Leaves: {6 - leave.employee.remainingLeaves} day/s</Typography>
+                            <Typography data-testid="remaining-leaves" variant='h6' >Remaining: {leave.employee.remainingLeaves} day/s</Typography>
                         </Box>
 
-                        <Box className='bg-[#0097e6] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                            <MoreTimeIcon sx={{ width: 60, height: 60 }} />
-                            <Typography data-testid="overtime" mt={2} variant='h6' >Overtime: {overTime.employee.totalOvertime}</Typography>
+                        <Box className='bg-[#d35400] flex flex-col gap-2 justify-center items-start grow p-4 rounded-md h-full'>
+                            <Typography data-testid="absences" variant='h6' >Absences: {absence.employee.totalAbsences} days</Typography>
+                            <Typography data-testid="overtime" variant='h6' >Overtime: {overTime.employee.totalOvertime} hrs</Typography>
                         </Box>
-
-
-
-                    </Box>
-
-                    {/*----------------------SECOND ROW EMP INFO--------------------------- */}
-
-                    <Box className='flex justify-between items-center gap-3 w-full  h-[140px]'>
-                        <Box className='bg-[#8e44ad] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                            <MeetingRoomIcon sx={{ width: 60, height: 60 }} />
-                            <Typography data-testid="remaining-leaves" mt={2} variant='h6' >Remaining Leaves: {leave.employee.remainingLeaves}</Typography>
-                        </Box>
-
-                        <Box className='bg-[#44bd32] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                            <LocalAtmIcon sx={{ width: 60, height: 60 }} />
-                            <Typography data-testid="salary-per-hour" mt={2} variant='h6' >Salary/Hour: {emp.employees[employeeInfoIndex].salaryPerHour}</Typography>
-                        </Box>
-
-                        <Box className='bg-[#192a56] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                            <PaidIcon sx={{ width: 60, height: 60 }} />
-                            <Typography data-testid="daily-wage" mt={2} variant='h6' >Daily Wage: {emp.employees[employeeInfoIndex].dailyWage}</Typography>
-                        </Box>
-
-                        <Box className='bg-[#16a085] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                            <AccountBalanceIcon sx={{ width: 60, height: 60 }} />
-                            <Typography data-testid="monthly-salary" mt={2} variant='h6' >Monthly Salary: {emp.employees[employeeInfoIndex].currMonthSal}</Typography>
-                        </Box>
-
                     </Box>
 
 
@@ -315,7 +288,7 @@ function Employee() {
 
                     <Box sx={style} component="form" className="flex flex-col items-center gap-3" onSubmit={handleOTFormSubmit}>
                         <Typography id="modal-modal-title" variant="h6" component="h2">
-                            Request leave form
+                            Request overtime form
                         </Typography>
 
                         <MobileDateTimePicker

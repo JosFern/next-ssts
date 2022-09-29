@@ -217,6 +217,7 @@ export default function EmployerForm() {
                         <Select
                             name='company'
                             label="Employee Type"
+                            disabled={!isFormAdd}
                             value={employerInfo.company}
                             onChange={handleChange}
                             data-testid="company-input"
