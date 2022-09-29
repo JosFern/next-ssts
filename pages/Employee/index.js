@@ -156,6 +156,7 @@ function Employee() {
         initiateReducers()
     }, [dispatch, log, absence.employee.totalAbsences, comp.companies, emp.employees, leave.employee.remainingLeaves, overTime.employee.totalOvertime])
 
+
     return (
         <LocalizationProvider dateAdapter={AdapterDateFns}>
             <DashboardLayout>
@@ -233,6 +234,7 @@ function Employee() {
 
                 </Box>
 
+                {/*------------------TABBLE TABS------------------------------*/}
                 <Box className='bg-white w-full'>
                     <Box>
                         <Tabs value={tabIndex} onChange={handleTabChange}>

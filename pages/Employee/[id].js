@@ -107,7 +107,7 @@ export default function EmployeeInfo() {
 
     }
 
-    console.log(abs.absences);
+
     initalizeReducers()
 
   }, [dispatch, abs.employee.totalAbsences, comp.company.leaves, comp.company.overtimeLimit, emp.employees, id, leave.employee.remainingLeaves, ot.employee.totalOvertime])

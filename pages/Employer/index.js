@@ -124,6 +124,44 @@ function Employer() {
         dispatch(deleteAccount(accountID))
     }
 
+    const getEmployeeLeaveRequests = (leaves) => {
+
+        const getAssocEmp = _.chain(leaves).map((leave) => {
+            const employee = _.find(emp.employees, { accountID: leave.employeeId })
+            if (employee?.associatedCompany === comp.company.accountID) {
+                return { ...leave, name: employee.firstName }
+            } else {
+                return null
+            }
+        }).filter((leave) => { return leave }).value()
+
+        // const getAssocCompany = _.filter(leaves, (leave) => {
+        //     const employee = _.find(emp.employees, { accountID: leave.employeeId })
+        //     return employee?.associatedCompany === comp.company.accountID
+        // })
+
+        return getAssocEmp;
+    }
+
+    const getEmployeeOTRequests = (overtimes) => {
+
+        const getAssocEmp = _.chain(overtimes).map((overtime) => {
+            const employee = _.find(emp.employees, { accountID: overtime.employeeId })
+            if (employee?.associatedCompany === comp.company.accountID) {
+                return { ...overtime, name: employee.firstName }
+            } else {
+                return null
+            }
+        }).filter((overtime) => { return overtime }).value()
+
+        // const getAssocCompany = _.filter(overtimes, (overtime) => {
+        //     const employee = _.find(emp.employees, { accountID: overtime.employeeId })
+        //     return employee?.associatedCompany === comp.company.accountID
+        // })
+
+        return getAssocEmp;
+    }
+
     return (
         <DashboardLayout>
 
@@ -228,6 +266,7 @@ function Employer() {
                                 <TableHead>
                                     <TableRow>
                                         <StyledTableCell>Account ID</StyledTableCell>
+                                        <StyledTableCell>Name</StyledTableCell>
                                         <StyledTableCell>Date Started</StyledTableCell>
                                         <StyledTableCell>Date Ended</StyledTableCell>
                                         <StyledTableCell>Reason</StyledTableCell>
@@ -235,12 +274,13 @@ function Employer() {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {_.map(leave.requestLeaves, (row, index) => (
+                                    {_.map(getEmployeeLeaveRequests(leave.requestLeaves), (row, index) => (
                                         <StyledTableRow
                                             key={index}
                                             sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                         >
                                             <StyledTableCell >{row.employeeId}</StyledTableCell>
+                                            <StyledTableCell >{row.name}</StyledTableCell>
                                             <StyledTableCell >{format(parseISO(row.dateStarted), 'PPpp')}</StyledTableCell>
                                             <StyledTableCell >{format(parseISO(row.dateEnded), 'PPpp')}</StyledTableCell>
                                             <StyledTableCell >{row.reason}</StyledTableCell>
@@ -263,6 +303,7 @@ function Employer() {
                                 <TableHead>
                                     <TableRow>
                                         <StyledTableCell>Account ID</StyledTableCell>
+                                        <StyledTableCell>Name</StyledTableCell>
                                         <StyledTableCell>Date Started</StyledTableCell>
                                         <StyledTableCell>Date Ended</StyledTableCell>
                                         <StyledTableCell>Reason</StyledTableCell>
@@ -270,12 +311,13 @@ function Employer() {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {_.map(ot.requestOvertime, (row, index) => (
+                                    {_.map(getEmployeeOTRequests(ot.requestOvertime), (row, index) => (
                                         <StyledTableRow
                                             key={index}
                                             sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                         >
                                             <StyledTableCell >{row.employeeId}</StyledTableCell>
+                                            <StyledTableCell >{row.name}</StyledTableCell>
                                             <StyledTableCell >{format(parseISO(row.dateStarted), 'PPpp')}</StyledTableCell>
                                             <StyledTableCell >{format(parseISO(row.dateEnded), 'PPpp')}</StyledTableCell>
                                             <StyledTableCell >{row.reason}</StyledTableCell>
