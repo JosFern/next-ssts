@@ -10,13 +10,17 @@
     "jest": "jest --watch"
   },
   "dependencies": {
+    "@date-io/jalaali": "^2.16.0",
     "@emotion/react": "^11.10.4",
     "@emotion/styled": "^11.10.4",
     "@mui/base": "^5.0.0-alpha.98",
     "@mui/icons-material": "^5.10.3",
+    "@mui/lab": "^5.0.0-alpha.101",
     "@mui/material": "^5.10.5",
+    "@mui/x-date-pickers": "^5.0.3",
     "@reduxjs/toolkit": "^1.8.5",
     "date-fns": "^2.29.3",
+    "date-fns-jalali": "^2.29.3-0",
     "install": "^0.13.0",
     "lodash": "^4.17.21",
     "next": "12.3.0",

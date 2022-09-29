@@ -15,6 +15,10 @@ export const Absences = createSlice({
             state.absences = action.payload
         },
 
+        addAbsent: (state, action) => {
+            state.absences.push(action.payload)
+        },
+
         computeTotalAbsences: (state, action) => {
             const { id, leaves, companyLeaves } = action.payload
 
@@ -37,6 +41,6 @@ export const Absences = createSlice({
     }
 })
 
-export const { setAbsences, computeTotalAbsences } = Absences.actions
+export const { setAbsences, addAbsent, computeTotalAbsences } = Absences.actions
 
 export default Absences.reducer

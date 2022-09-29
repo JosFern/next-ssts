@@ -1,14 +1,6 @@
 import { useEffect, useState } from 'react';
-import { Avatar, TextField, Typography } from '@mui/material';
+import { Avatar, TextField, Typography, Tabs, Tab } from '@mui/material';
 import { blue } from '@mui/material/colors';
-import Table from '@mui/material/Table';
-import TableBody from '@mui/material/TableBody';
-import TableCell, { tableCellClasses } from '@mui/material/TableCell';
-import TableContainer from '@mui/material/TableContainer';
-import TableHead from '@mui/material/TableHead';
-import TableRow from '@mui/material/TableRow';
-import Paper from '@mui/material/Paper';
-import { styled } from '@mui/material/styles';
 import Button from '@mui/material/Button';
 import Modal from '@mui/material/Modal';
 import Box from '@mui/material/Box';
@@ -21,34 +13,24 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import MoreTimeIcon from '@mui/icons-material/MoreTime';
 import PaidIcon from '@mui/icons-material/Paid';
 import { useDispatch, useSelector } from 'react-redux';
-import { computeRemainingLeaves, setLeaves } from '../../store/reducers/leaves';
+import { addLeaveRequest, computeRemainingLeaves, setLeaves } from '../../store/reducers/leaves';
 import { addDays, parseISO, formatISO, format, isSameMonth } from 'date-fns';
 import { computeTotalAbsences, setAbsences } from '../../store/reducers/absences';
-import { computeTotalOvertime, setOvertime } from '../../store/reducers/overtime';
-import { computeDailyWage, computeMonthlySalary, setMonthlySalares } from '../../store/reducers/employee';
-import { setCompanies } from '../../store/reducers/company';
+import { addOTRequest, computeTotalOvertime, setOvertime } from '../../store/reducers/overtime';
+import { computeDailyWage, computeMonthlySalary, setCurrentEmployee, setMonthlySalares } from '../../store/reducers/employee';
+import { setCompanies, setCompany } from '../../store/reducers/company';
 import _ from 'lodash';
-
-const StyledTableCell = styled(TableCell)(({ theme }) => ({
-    [`&.${tableCellClasses.head}`]: {
-        backgroundColor: '#192a56',
-        color: theme.palette.common.white,
-    },
-    [`&.${tableCellClasses.body}`]: {
-        fontSize: 14,
-    },
-}));
-
-const StyledTableRow = styled(TableRow)(({ theme }) => ({
-    '&:nth-of-type(odd)': {
-        backgroundColor: theme.palette.action.hover,
-    },
-    // hide last border
-    '&:last-child td, &:last-child th': {
-        border: 0,
-    },
-}));
-
+import LeavesTable from '../components/LeavesTable';
+import AbsencesTable from '../components/AbsencesTable';
+import OvertimeTable from '../components/OvertimeTable';
+import leaves from '../../_sampleData/leaves'
+import absences from '../../_sampleData/absences'
+import overtime from '../../_sampleData/overtime'
+import monthlySalaries from '../../_sampleData/monthlySalaries'
+import { MobileDateTimePicker } from '@mui/x-date-pickers/MobileDateTimePicker';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
+import { LocalizationProvider } from '@mui/x-date-pickers';
+import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 
 const style = {
     position: 'absolute',
@@ -65,348 +47,318 @@ const style = {
 
 function Employee() {
 
-    const [open, setOpen] = useState(false)
+    const [leaveRequestModal, setLeaveRequestModal] = useState(false)
+    const [otRequestModal, setOTRequestModal] = useState(false)
+
+
 
     const dispatch = useDispatch();
     const emp = useSelector(state => state.employee)
     const leave = useSelector(state => state.leaves)
     const absence = useSelector(state => state.absences)
     const overTime = useSelector(state => state.overtime)
+    const comp = useSelector(state => state.company)
     const log = useSelector(state => state.logged)
+
+    const [leaveDateStart, setLeaveDateStart] = useState(new Date())
+    const [leaveDateEnd, setLeaveDateEnd] = useState(new Date())
+
+    const [otDateStart, setOTDateStart] = useState(new Date())
+    const [otDateEnd, setOTDateEnd] = useState(new Date())
+
+    const [reason, setReason] = useState('')
 
     const employeeInfoIndex = _.findIndex(emp.employees, { accountID: log.loggedIn.id })
 
-    const leaves = [
-        {
-            id: 1,
-            employeeId: 1,
-            dateStarted: '2022-09-21T20:10:34+08:00',
-            dateEnded: '2022-09-21T20:10:34+08:00',
-            reason: 'vacation'
-        },
-        {
-            id: 2,
-            employeeId: 1,
-            dateStarted: '2022-09-23T20:10:34+08:00',
-            dateEnded: '2022-09-23T20:10:34+08:00',
-            reason: 'fever'
-        },
-        {
-            id: 3,
-            employeeId: 1,
-            dateStarted: '2022-09-26T20:10:34+08:00',
-            dateEnded: '2022-09-28T20:10:34+08:00',
-            reason: 'vacation'
-        }
-    ];
+    const [tabIndex, setTabIndex] = useState(0);
 
-    const absences = [
-        {
-            id: 1,
-            employeeId: 1,
-            dateStarted: '2022-09-01T20:10:34+08:00',
-            dateEnded: '2022-09-02T20:10:34+08:00',
-            reason: 'hospital'
-        },
-        {
-            id: 2,
-            employeeId: 1,
-            dateStarted: '2022-09-21T20:10:34+08:00',
-            dateEnded: '2022-09-22T20:10:34+08:00',
-            reason: 'hospital'
-        },
-        {
-            id: 3,
-            employeeId: 1,
-            dateStarted: '2022-09-26T20:10:34+08:00',
-            dateEnded: '2022-09-26T20:10:34+08:00',
-            reason: 'hospital'
-        }
-    ]
+    const handleTabChange = (event, newTabIndex) => {
+        setTabIndex(newTabIndex);
+    };
 
-    const overtimes = [
-        {
-            id: 1,
-            employeeId: 1,
-            dateStarted: '2022-09-01T17:10:34+08:00',
-            dateEnded: '2022-09-01T21:10:34+08:00',
-            reason: 'fix some bugs'
-        },
-        {
-            id: 1,
-            employeeId: 1,
-            dateStarted: '2022-09-12T17:10:34+08:00',
-            dateEnded: '2022-09-12T20:10:34+08:00',
-            reason: 'fix some bugs'
-        },
-    ]
+    const handleLeaveFormSubmit = (e) => {
+        e.preventDefault()
 
-    const companies = [
-        //sample company data
-        {
-            id: 1,
-            name: 'Lemondrop',
-            leaves: 6,
-            accountID: 101,
-            overtimeLimit: 30
-        },
-        {
-            id: 2,
-            name: 'Workbean',
-            leaves: 6,
-            accountID: 102,
-            overtimeLimit: 30
-        }
-    ]
+        dispatch(addLeaveRequest({
+            employeeId: log.loggedIn.id,
+            dateStarted: formatISO(leaveDateStart),
+            dateEnded: formatISO(leaveDateEnd),
+            reason: reason
+        }))
+        setLeaveRequestModal(false)
+        setReason('')
+    }
 
-    const monthlySalaries = [
-        {
-            empId: 1,
-            dateMonth: '2022-08-01T21:10:34+08:00',
-            salary: 0
-        },
-        {
-            empId: 1,
-            dateMonth: '2022-07-01T21:10:34+08:00',
-            salary: 0
-        },
-        {
-            empId: 1,
-            dateMonth: '2022-09-01T21:10:34+08:00',
-            salary: 0
-        },
-    ]
+    const handleOTFormSubmit = (e) => {
+        e.preventDefault()
+
+        dispatch(addOTRequest({
+            employeeId: log.loggedIn.id,
+            dateStarted: formatISO(otDateStart),
+            dateEnded: formatISO(otDateEnd),
+            reason: reason
+        }))
+        setOTRequestModal(false)
+        setReason('')
+    }
 
 
 
     useEffect(() => {
         const initiateReducers = async () => {
 
-            await dispatch(setLeaves(leaves))
+            const employee = _.find(emp.employees, { accountID: log.loggedIn.id })
 
-            await dispatch(setAbsences(absences))
+            const company = _.find(comp.companies, { accountID: employee.associatedCompany })
 
-            await dispatch(setOvertime(overtimes))
+            await dispatch(setCurrentEmployee(employee))
 
-            // await dispatch(setCompanies(companies))
+            await dispatch(setCompany(employee.associatedCompany))
+
+            // await dispatch(setLeaves(leaves))
+
+            // await dispatch(setAbsences(absences))
+
+            // await dispatch(setOvertime(overtime))
 
             await dispatch(setMonthlySalares(monthlySalaries))
 
-            await dispatch(computeRemainingLeaves({ companyLeaves: 6, id: log.loggedIn.id }))
+            await dispatch(computeRemainingLeaves({
+                companyLeaves: company.leaves,
+                id: log.loggedIn.id
+            }))
 
-            await dispatch(computeTotalAbsences({ id: log.loggedIn.id, leaves: 3, companyLeaves: 6 }))
+            await dispatch(computeTotalAbsences({
+                id: log.loggedIn.id,
+                leaves: (company.leaves - leave.employee.remainingLeaves),
+                companyLeaves: company.leaves
+            }))
 
-            await dispatch(computeTotalOvertime({ id: log.loggedIn.id, companyOvertimeLimit: 30 }))
+            await dispatch(computeTotalOvertime({
+                id: log.loggedIn.id,
+                companyOvertimeLimit: company.overtimeLimit
+            }))
 
             await dispatch(computeDailyWage({ id: log.loggedIn.id }))
 
-            await dispatch(computeMonthlySalary({ id: log.loggedIn.id, overtime: 7, leavesRemaining: 1, totalAbsences: 5 }))
+            await dispatch(computeMonthlySalary({
+                id: log.loggedIn.id,
+                overtime: overTime.employee.totalOvertime,
+                leavesRemaining: leave.employee.remainingLeaves,
+                totalAbsences: absence.employee.totalAbsences
+            }))
 
         }
 
+        console.log(overTime.requestOvertime);
+
+
         initiateReducers()
-    }, [dispatch, log])
+    }, [dispatch, log, absence.employee.totalAbsences, comp.companies, emp.employees, leave.employee.remainingLeaves, overTime.employee.totalOvertime])
 
     return (
-        <DashboardLayout>
-
-            <Box
-                data-testid="employee-basic-info"
-                className='flex flex-col justify-between items-center gap-3 text-white'
-            >
-                {/*----------------------FIRST ROW EMP INFO--------------------------- */}
-                <Box className='flex justify-between items-center gap-3 w-full h-[140px]'>
-                    <Box className='bg-[#fba600] flex p-4 rounded-md gap-4 h-full grow'>
-                        <Link href='../profile'>
-                            <Avatar sx={{ bgcolor: blue[800], width: 80, height: 80, fontSize: '40px' }}>E</Avatar>
-                        </Link>
-
-                        <Box>
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+            <DashboardLayout>
+                <Box
+                    data-testid="employee-basic-info"
+                    className='flex flex-col justify-between items-center gap-3 text-white'
+                >
+                    {/*----------------------FIRST ROW EMP INFO--------------------------- */}
+                    <Box className='flex justify-between items-center gap-3 w-full h-[140px]'>
+                        <Box className='bg-[#fba600] flex p-4 rounded-md gap-4 h-full grow'>
                             <Link href='../profile'>
-                                <Typography data-testid="name" style={{ cursor: 'pointer' }} mt={2} variant='h5' margin={0} padding={0}>{log.loggedIn.firstName}</Typography>
+                                <Avatar sx={{ bgcolor: blue[800], width: 80, height: 80, fontSize: '40px' }}>E</Avatar>
                             </Link>
-                            <Typography mb={2} variant='body1'>Employee</Typography>
-                            <Button data-testid="request-leave" className='bg-[#0055fb] text-white hover:bg-[#001b51]' variant='contained' onClick={() => setOpen(true)}>Request leave</Button>
 
+                            <Box>
+                                <Link href='../profile'>
+                                    <Typography data-testid="name" style={{ cursor: 'pointer' }} mt={2} variant='h5' margin={0} padding={0}>{log.loggedIn.firstName}</Typography>
+                                </Link>
+                                <Typography mb={2} variant='body1'>Employee</Typography>
+                                <Box className='flex gap-3'>
+                                    <Button data-testid="request-leave" className='bg-[#0055fb] text-white hover:bg-[#001b51]' variant='contained' onClick={() => setLeaveRequestModal(true)}>Request leave</Button>
+
+                                    <Button data-testid="request-leave" className='bg-[#0055fb] text-white hover:bg-[#001b51]' variant='contained' onClick={() => setOTRequestModal(true)}>Request overtime</Button>
+
+                                </Box>
+
+                            </Box>
+
+                        </Box>
+
+                        <Box className='bg-[#8e44ad] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
+                            <MeetingRoomIcon sx={{ width: 60, height: 60 }} />
+                            <Typography data-testid="leaves" mt={2} variant='h6' >Leaves: {6 - leave.employee.remainingLeaves}</Typography>
+                        </Box>
+
+                        <Box className='bg-[#d35400] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
+                            <RunningWithErrorsIcon sx={{ width: 60, height: 60 }} />
+                            <Typography data-testid="absences" mt={2} variant='h6' >Absences: {absence.employee.totalAbsences}</Typography>
+                        </Box>
+
+                        <Box className='bg-[#0097e6] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
+                            <MoreTimeIcon sx={{ width: 60, height: 60 }} />
+                            <Typography data-testid="overtime" mt={2} variant='h6' >Overtime: {overTime.employee.totalOvertime}</Typography>
+                        </Box>
+
+
+
+                    </Box>
+
+                    {/*----------------------SECOND ROW EMP INFO--------------------------- */}
+
+                    <Box className='flex justify-between items-center gap-3 w-full  h-[140px]'>
+                        <Box className='bg-[#8e44ad] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
+                            <MeetingRoomIcon sx={{ width: 60, height: 60 }} />
+                            <Typography data-testid="remaining-leaves" mt={2} variant='h6' >Remaining Leaves: {leave.employee.remainingLeaves}</Typography>
+                        </Box>
+
+                        <Box className='bg-[#44bd32] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
+                            <LocalAtmIcon sx={{ width: 60, height: 60 }} />
+                            <Typography data-testid="salary-per-hour" mt={2} variant='h6' >Salary/Hour: {emp.employees[employeeInfoIndex].salaryPerHour}</Typography>
+                        </Box>
+
+                        <Box className='bg-[#192a56] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
+                            <PaidIcon sx={{ width: 60, height: 60 }} />
+                            <Typography data-testid="daily-wage" mt={2} variant='h6' >Daily Wage: {emp.employees[employeeInfoIndex].dailyWage}</Typography>
+                        </Box>
+
+                        <Box className='bg-[#16a085] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
+                            <AccountBalanceIcon sx={{ width: 60, height: 60 }} />
+                            <Typography data-testid="monthly-salary" mt={2} variant='h6' >Monthly Salary: {emp.employees[employeeInfoIndex].currMonthSal}</Typography>
                         </Box>
 
                     </Box>
 
-                    <Box className='bg-[#8e44ad] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                        <MeetingRoomIcon sx={{ width: 60, height: 60 }} />
-                        <Typography data-testid="leaves" mt={2} variant='h6' >Leaves: {6 - leave.employee.remainingLeaves}</Typography>
-                    </Box>
-
-                    <Box className='bg-[#d35400] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                        <RunningWithErrorsIcon sx={{ width: 60, height: 60 }} />
-                        <Typography data-testid="absences" mt={2} variant='h6' >Absences: {absence.employee.totalAbsences}</Typography>
-                    </Box>
-
-                    <Box className='bg-[#0097e6] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                        <MoreTimeIcon sx={{ width: 60, height: 60 }} />
-                        <Typography data-testid="overtime" mt={2} variant='h6' >Overtime: {overTime.employee.totalOvertime}</Typography>
-                    </Box>
-
-
 
                 </Box>
 
-                {/*----------------------SECOND ROW EMP INFO--------------------------- */}
-
-                <Box className='flex justify-between items-center gap-3 w-full  h-[140px]'>
-                    <Box className='bg-[#8e44ad] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                        <MeetingRoomIcon sx={{ width: 60, height: 60 }} />
-                        <Typography data-testid="remaining-leaves" mt={2} variant='h6' >Remaining Leaves: {leave.employee.remainingLeaves}</Typography>
+                <Box className='bg-white w-full'>
+                    <Box>
+                        <Tabs value={tabIndex} onChange={handleTabChange}>
+                            <Tab label="Leaves" />
+                            <Tab label="Absences" />
+                            <Tab label="Overtime" />
+                        </Tabs>
                     </Box>
-
-                    <Box className='bg-[#44bd32] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                        <LocalAtmIcon sx={{ width: 60, height: 60 }} />
-                        <Typography data-testid="salary-per-hour" mt={2} variant='h6' >Salary/Hour: {emp.employees[employeeInfoIndex].salaryPerHour}</Typography>
+                    <Box>
+                        {/*----------------------LIST OF LEAVES TAB--------------------- */}
+                        {tabIndex === 0 && (
+                            <LeavesTable leaves={_.filter(leave.leaves, { employeeId: emp.employee.accountID })} />
+                        )}
+                        {/*----------------------LIST OF ABSENCES TAB--------------------- */}
+                        {tabIndex === 1 && (
+                            <AbsencesTable absences={_.filter(absence.absences, { employeeId: emp.employee.accountID })} />
+                        )}
+                        {/*----------------------LIST OF OVERTIME TAB--------------------- */}
+                        {tabIndex === 2 && (
+                            <OvertimeTable overtimes={_.filter(overTime.overtime, { employeeId: emp.employee.accountID })} />
+                        )}
                     </Box>
-
-                    <Box className='bg-[#192a56] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                        <PaidIcon sx={{ width: 60, height: 60 }} />
-                        <Typography data-testid="daily-wage" mt={2} variant='h6' >Daily Wage: {emp.employees[employeeInfoIndex].dailyWage}</Typography>
-                    </Box>
-
-                    <Box className='bg-[#16a085] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
-                        <AccountBalanceIcon sx={{ width: 60, height: 60 }} />
-                        <Typography data-testid="monthly-salary" mt={2} variant='h6' >Monthly Salary: {emp.employees[employeeInfoIndex].currMonthSal}</Typography>
-                    </Box>
-
                 </Box>
 
+                {/*-----------------LEAVE REQUEST MODAL-------------- */}
+                <Modal
+                    open={leaveRequestModal}
+                    onClose={() => setLeaveRequestModal(false)}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                >
+                    <Box sx={style} className="flex flex-col items-center gap-3" component="form" onSubmit={handleLeaveFormSubmit}>
+                        <Typography id="modal-modal-title" className='my-4' variant="h6" component="h2">
+                            Request leave form
+                        </Typography>
 
-            </Box>
+                        <DatePicker
+                            label="Start Date"
+                            className='w-full'
+                            value={leaveDateStart}
+                            onChange={setLeaveDateStart}
+                            renderInput={(params) => <TextField {...params} />}
+                        />
 
-            {/**---------------LEAVES TABLE----------------------- */}
-            <Typography className='text-center my-4 font-bold text-2xl tracking-wide'>
-                Leaves
-            </Typography>
-            <TableContainer component={Paper} data-testid="leaves-table">
-                <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                    <TableHead>
-                        <TableRow>
-                            <StyledTableCell>Date Started</StyledTableCell>
-                            <StyledTableCell>Date Ended</StyledTableCell>
-                            <StyledTableCell>Reason</StyledTableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {_.map(leave.leaves, (row, index) => (
-                            <StyledTableRow key={index}>
-                                <StyledTableCell component="th" scope="row">
-                                    {format(parseISO(row.dateStarted), 'PPpp')}
-                                </StyledTableCell>
-                                <StyledTableCell >{format(parseISO(row.dateEnded), 'PPpp')}</StyledTableCell>
-                                <StyledTableCell >{row.reason}</StyledTableCell>
-                            </StyledTableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                        <DatePicker
+                            label="End Date"
+                            className='w-full'
+                            value={leaveDateEnd}
+                            onChange={setLeaveDateEnd}
+                            renderInput={(params) => <TextField {...params} />}
+                        />
+                        <TextField
+                            type="text"
+                            variant="outlined"
+                            color="secondary"
+                            label='Reason'
+                            fullWidth
+                            required
+                            name='reason'
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
 
-            {/**---------------ABCENCES TABLE----------------------- */}
-            <Typography className='text-center my-4 font-bold text-2xl tracking-wide'>
-                Absences
-            </Typography>
-            <TableContainer component={Paper} data-testid="absences-table">
-                <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                    <TableHead>
-                        <TableRow>
-                            <StyledTableCell>Date Started</StyledTableCell>
-                            <StyledTableCell>Date Ended</StyledTableCell>
-                            <StyledTableCell>Reason</StyledTableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {_.map(absence.absences, (row, index) => (
-                            <StyledTableRow key={index}>
-                                <StyledTableCell component="th" scope="row">
-                                    {format(parseISO(row.dateStarted), 'PPpp')}
-                                </StyledTableCell>
-                                <StyledTableCell >{format(parseISO(row.dateEnded), 'PPpp')}</StyledTableCell>
-                                <StyledTableCell >{row.reason}</StyledTableCell>
-                            </StyledTableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                        />
 
-            {/**---------------OVERTIME TABLE----------------------- */}
-            <Typography className='text-center my-4 font-bold text-2xl tracking-wide'>
-                Overtime
-            </Typography>
-            <TableContainer component={Paper} data-testid="overtime-table">
-                <Table sx={{ minWidth: 700 }} aria-label="customized table">
-                    <TableHead>
-                        <TableRow>
-                            <StyledTableCell>Date Started</StyledTableCell>
-                            <StyledTableCell>Date Ended</StyledTableCell>
-                            <StyledTableCell>Reason</StyledTableCell>
-                        </TableRow>
-                    </TableHead>
-                    <TableBody>
-                        {_.map(overTime.overtime, (row, index) => (
-                            <StyledTableRow key={index}>
-                                <StyledTableCell component="th" scope="row">
-                                    {format(parseISO(row.dateStarted), 'PPpp')}
-                                </StyledTableCell>
-                                <StyledTableCell >{format(parseISO(row.dateEnded), 'PPpp')}</StyledTableCell>
-                                <StyledTableCell >{row.reason}</StyledTableCell>
-                            </StyledTableRow>
-                        ))}
-                    </TableBody>
-                </Table>
-            </TableContainer>
+                        <Button type='submit' className='bg-[#33b33d]' color='success' variant='contained'>Submit</Button>
+                    </Box>
+                </Modal>
 
-            <Modal
-                open={open}
-                onClose={() => setOpen(false)}
-                aria-labelledby="modal-modal-title"
-                aria-describedby="modal-modal-description"
-            >
-                <Box sx={style}>
-                    <Typography id="modal-modal-title" variant="h6" component="h2">
-                        Request leave form
-                    </Typography>
-                    <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                        Start Date:
-                    </Typography>
-                    <TextField
-                        type="date"
-                        variant="outlined"
-                        color="secondary"
-                        margin='normal'
-                        fullWidth
-                        required
-                    />
 
-                    <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-                        End Date:
-                    </Typography>
-                    <TextField
-                        type="date"
-                        variant="outlined"
-                        color="secondary"
-                        margin='normal'
-                        fullWidth
-                        required
-                    />
-                    <TextField
-                        type="text"
-                        variant="outlined"
-                        color="secondary"
-                        margin='normal'
-                        label='Reason'
-                        fullWidth
-                        required
-                    />
+                {/*-----------------OVERTIME REQUEST MODAL-------------- */}
+                <Modal
+                    open={otRequestModal}
+                    onClose={() => setOTRequestModal(false)}
+                    aria-labelledby="modal-modal-title"
+                    aria-describedby="modal-modal-description"
+                >
 
-                    <Button className='bg-[#33b33d]' color='success' variant='contained'>Submit</Button>
-                </Box>
-            </Modal>
-        </DashboardLayout>
+
+                    <Box sx={style} component="form" className="flex flex-col items-center gap-3" onSubmit={handleOTFormSubmit}>
+                        <Typography id="modal-modal-title" variant="h6" component="h2">
+                            Request leave form
+                        </Typography>
+
+                        <MobileDateTimePicker
+                            className='w-full'
+                            value={otDateStart}
+                            onChange={(newValue) => {
+                                setOTDateStart(newValue);
+                            }}
+                            label="Start Date Time"
+                            inputFormat="yyy/mm/dd hh:mm a"
+                            mask="____/__/__ __:__ _M"
+                            renderInput={(params) => <TextField {...params} />}
+                        />
+
+                        <MobileDateTimePicker
+                            className='w-full'
+                            value={otDateEnd}
+                            onChange={(newValue) => {
+                                setOTDateEnd(newValue);
+                            }}
+                            label="Start Date Time"
+                            inputFormat="yyy/mm/dd hh:mm a"
+                            mask="____/__/__ __:__ _M"
+                            renderInput={(params) => <TextField {...params} />}
+                        />
+
+                        <TextField
+                            type="text"
+                            variant="outlined"
+                            color="secondary"
+                            label='Reason'
+                            fullWidth
+                            required
+                            name='reason'
+                            value={reason}
+                            onChange={(e) => setReason(e.target.value)}
+
+                        />
+
+                        <Button type='submit' className='bg-[#33b33d]' color='success' variant='contained'>Submit</Button>
+                    </Box>
+                </Modal>
+
+            </DashboardLayout>
+        </LocalizationProvider>
     )
 }
 

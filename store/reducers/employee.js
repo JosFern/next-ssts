@@ -115,6 +115,9 @@ export const EmployeeStore = createSlice({
             state.employees[index].dailyWage = salaryPerHour * dailyWorkHours
 
             // console.log('daily wage: ' + (salaryPerHour * dailyWorkHours));
+
+
+            state.employee = { ...state.employee, dailyWage: salaryPerHour * dailyWorkHours }
         },
 
         computeMonthlySalary: (state, action) => {
@@ -147,6 +150,8 @@ export const EmployeeStore = createSlice({
             if (!isMonthSalaryExist) state.monthlySalary.push({ empId: id, dateMonth: formatISO(new Date), salary: monthSalary })
 
             state.employees[_.findIndex(state.employees, { accountID: id })].currMonthSal = monthSalary;
+
+            state.employee = { ...state.employee, currMonthSal: monthSalary }
         }
     }
 })

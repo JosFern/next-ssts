@@ -1,4 +1,4 @@
-import { Avatar, ButtonGroup, Table, TableBody, TableContainer, TableHead, TableRow } from '@mui/material'
+import { Avatar, ButtonGroup, Table, TableBody, TableContainer, TableHead, TableRow, Tab, Tabs } from '@mui/material'
 import TableCell, { tableCellClasses } from '@mui/material/TableCell';
 import Button from '@mui/material/Button';
 import { styled } from '@mui/material/styles';
@@ -19,6 +19,9 @@ import { deleteEmployee, setEmployees } from '../../store/reducers/employee';
 import { deleteAccount } from '../../store/reducers/account';
 import { setCompanies, setCompany } from '../../store/reducers/company';
 import BusinessIcon from '@mui/icons-material/Business';
+import { format, parseISO } from 'date-fns';
+import { approveRequest, disapproveRequest } from '../../store/reducers/leaves';
+import { approveOTRequest, disapproveOTRequest } from '../../store/reducers/overtime';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -42,16 +45,6 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     },
 }));
 
-function createData(id, first, last, email, position, password) {
-    return { id, first, last, email, position, password };
-}
-
-const rows = [
-    createData(1, 'Frozen', 'yoghurt', 'forze@gmail.com', 'ice cream', 20, '123123123'),
-    createData(2, 'Frozen', 'yoghurt', 'froze@gmail.com', 'ice cream', 20, '123123123'),
-    createData(3, 'Frozen', 'yoghurt', 'forza@gmail.com', 'ice cream', 20, '123123123'),
-    createData(4, 'Frozen', 'yoghurt', 'forzo@gmail.com', 'ice cream', 20, '123123123'),
-];
 
 function Employer() {
 
@@ -61,7 +54,14 @@ function Employer() {
     const user = useSelector(state => state.logged)
     const emp = useSelector(state => state.employee)
     const comp = useSelector(state => state.company)
+    const leave = useSelector(state => state.leaves)
+    const ot = useSelector(state => state.overtime)
 
+    const [tabIndex, setTabIndex] = useState(0);
+
+    const handleTabChange = (event, newTabIndex) => {
+        setTabIndex(newTabIndex);
+    };
 
 
     const dispatch = useDispatch()
@@ -164,52 +164,135 @@ function Employer() {
 
             </Box>
 
-            <Box
-                style={{
-                    marginTop: '20px'
-                }}
-            >
-                <TableContainer component={Paper} data-testid="employee-table">
-                    <Table sx={{ minWidth: 700 }}>
-                        <TableHead>
-                            <TableRow>
-                                <StyledTableCell>Employee ID</StyledTableCell>
-                                <StyledTableCell>First Name</StyledTableCell>
-                                <StyledTableCell>Last Name</StyledTableCell>
-                                <StyledTableCell>Position</StyledTableCell>
-                                <StyledTableCell>Salary Per Hour</StyledTableCell>
-                                <StyledTableCell>Employee Type</StyledTableCell>
-                                <StyledTableCell>Actions</StyledTableCell>
-                            </TableRow>
-                        </TableHead>
-                        <TableBody>
-                            {_.map(_.filter(emp.employees, { associatedCompany: comp.company?.accountID }), (row, index) => (
-                                <StyledTableRow
-                                    key={index}
-                                    sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
-                                >
-                                    <StyledTableCell>
-                                        {row.employeeID}
-                                    </StyledTableCell>
-                                    <StyledTableCell>
-                                        {row.firstName}
-                                    </StyledTableCell>
-                                    <StyledTableCell >{row.lastName}</StyledTableCell>
-                                    <StyledTableCell >{row.position}</StyledTableCell>
-                                    <StyledTableCell >{row.salaryPerHour}</StyledTableCell>
-                                    <StyledTableCell >{row.employeeType === 'fulltime' ? 'Full Time' : 'Part Time'}</StyledTableCell>
-                                    <StyledTableCell >
-                                        <ButtonGroup variant="contained">
-                                            <Button className='bg-[#0e79e1]' color='info' onClick={() => router.push('/employee/' + row.accountID)} >Info</Button>
-                                            <Button className='bg-[#33b33d]' color='success' onClick={() => router.push('/employee/form?id=' + row.accountID)}>Update</Button>
-                                            <Button onClick={() => deleteEmployeeInfo(row.accountID)} className='bg-[#dc3c18]' color='error'>Delete</Button>
-                                        </ButtonGroup>
-                                    </StyledTableCell>
-                                </StyledTableRow>
-                            ))}
-                        </TableBody>
-                    </Table>
-                </TableContainer>
+            <Box className='bg-white w-full'>
+                <Box>
+                    <Tabs value={tabIndex} onChange={handleTabChange}>
+                        <Tab label="Employees" />
+                        <Tab label="Leave Requests" />
+                        <Tab label="Overtime Requests" />
+                    </Tabs>
+                </Box>
+                <Box>
+                    {/*----------------------LIST OF EMPLOYEES TAB--------------------- */}
+                    {tabIndex === 0 && (
+                        <TableContainer component={Paper} data-testid="employee-table">
+                            <Table sx={{ minWidth: 700 }}>
+                                <TableHead>
+                                    <TableRow>
+                                        <StyledTableCell>Account ID</StyledTableCell>
+                                        <StyledTableCell>Employee ID</StyledTableCell>
+                                        <StyledTableCell>First Name</StyledTableCell>
+                                        <StyledTableCell>Last Name</StyledTableCell>
+                                        <StyledTableCell>Position</StyledTableCell>
+                                        <StyledTableCell>Salary Per Hour</StyledTableCell>
+                                        <StyledTableCell>Employee Type</StyledTableCell>
+                                        <StyledTableCell>Actions</StyledTableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {_.map(_.filter(emp.employees, { associatedCompany: comp.company?.accountID }), (row, index) => (
+                                        <StyledTableRow
+                                            key={index}
+                                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                        >
+                                            <StyledTableCell>
+                                                {row.accountID}
+                                            </StyledTableCell>
+                                            <StyledTableCell>
+                                                {row.employeeID}
+                                            </StyledTableCell>
+                                            <StyledTableCell>
+                                                {row.firstName}
+                                            </StyledTableCell>
+                                            <StyledTableCell >{row.lastName}</StyledTableCell>
+                                            <StyledTableCell >{row.position}</StyledTableCell>
+                                            <StyledTableCell >{row.salaryPerHour}</StyledTableCell>
+                                            <StyledTableCell >{row.employeeType === 'fulltime' ? 'Full Time' : 'Part Time'}</StyledTableCell>
+                                            <StyledTableCell >
+                                                <ButtonGroup variant="contained">
+                                                    <Button className='bg-[#0e79e1]' color='info' onClick={() => router.push('/employee/' + row.accountID)} >Info</Button>
+                                                    <Button className='bg-[#33b33d]' color='success' onClick={() => router.push('/employee/form?id=' + row.accountID)}>Update</Button>
+                                                    <Button onClick={() => deleteEmployeeInfo(row.accountID)} className='bg-[#dc3c18]' color='error'>Delete</Button>
+                                                </ButtonGroup>
+                                            </StyledTableCell>
+                                        </StyledTableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    )}
+                    {/*----------------------LIST OF REQUEST LEAVES TAB--------------------- */}
+                    {tabIndex === 1 && (
+                        <TableContainer component={Paper} data-testid="employer-table">
+                            <Table sx={{ minWidth: 700 }}>
+                                <TableHead>
+                                    <TableRow>
+                                        <StyledTableCell>Account ID</StyledTableCell>
+                                        <StyledTableCell>Date Started</StyledTableCell>
+                                        <StyledTableCell>Date Ended</StyledTableCell>
+                                        <StyledTableCell>Reason</StyledTableCell>
+                                        <StyledTableCell>Actions</StyledTableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {_.map(leave.requestLeaves, (row, index) => (
+                                        <StyledTableRow
+                                            key={index}
+                                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                        >
+                                            <StyledTableCell >{row.employeeId}</StyledTableCell>
+                                            <StyledTableCell >{format(parseISO(row.dateStarted), 'PPpp')}</StyledTableCell>
+                                            <StyledTableCell >{format(parseISO(row.dateEnded), 'PPpp')}</StyledTableCell>
+                                            <StyledTableCell >{row.reason}</StyledTableCell>
+                                            <StyledTableCell >
+                                                <ButtonGroup variant="contained">
+                                                    <Button onClick={() => dispatch(approveRequest(index))} className='bg-[#33b33d]' color='success' >Approve</Button>
+                                                    <Button onClick={(index) => dispatch(disapproveRequest(index))} className='bg-[#dc3c18]' color='error'>Disapprove</Button>
+                                                </ButtonGroup>
+                                            </StyledTableCell>
+                                        </StyledTableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    )}
+                    {/*----------------------LIST OF REQUEST OVERTIME TAB--------------------- */}
+                    {tabIndex === 2 && (
+                        <TableContainer component={Paper} data-testid="employer-table">
+                            <Table sx={{ minWidth: 700 }}>
+                                <TableHead>
+                                    <TableRow>
+                                        <StyledTableCell>Account ID</StyledTableCell>
+                                        <StyledTableCell>Date Started</StyledTableCell>
+                                        <StyledTableCell>Date Ended</StyledTableCell>
+                                        <StyledTableCell>Reason</StyledTableCell>
+                                        <StyledTableCell>Actions</StyledTableCell>
+                                    </TableRow>
+                                </TableHead>
+                                <TableBody>
+                                    {_.map(ot.requestOvertime, (row, index) => (
+                                        <StyledTableRow
+                                            key={index}
+                                            sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
+                                        >
+                                            <StyledTableCell >{row.employeeId}</StyledTableCell>
+                                            <StyledTableCell >{format(parseISO(row.dateStarted), 'PPpp')}</StyledTableCell>
+                                            <StyledTableCell >{format(parseISO(row.dateEnded), 'PPpp')}</StyledTableCell>
+                                            <StyledTableCell >{row.reason}</StyledTableCell>
+                                            <StyledTableCell >
+                                                <ButtonGroup variant="contained">
+                                                    <Button onClick={() => dispatch(approveOTRequest(index))} className='bg-[#33b33d]' color='success' >Approve</Button>
+                                                    <Button onClick={(index) => dispatch(disapproveOTRequest(index))} className='bg-[#dc3c18]' color='error'>Disapprove</Button>
+                                                </ButtonGroup>
+                                            </StyledTableCell>
+                                        </StyledTableRow>
+                                    ))}
+                                </TableBody>
+                            </Table>
+                        </TableContainer>
+                    )}
+
+                </Box>
             </Box>
 
         </DashboardLayout>

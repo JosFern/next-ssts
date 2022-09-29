@@ -8,27 +8,33 @@ export const Overtime = createSlice({
         employee: {
             totalOvertime: 0,
         },
-        overtime: [
-            {
-                id: 1,
-                employeeId: 1,
-                dateStarted: '2022-09-01T17:10:34+08:00',
-                dateEnded: '2022-09-01T21:10:34+08:00',
-                reason: 'vacation'
-            },
-            {
-                id: 1,
-                employeeId: 1,
-                dateStarted: '2022-09-12T17:10:34+08:00',
-                dateEnded: '2022-09-12T20:10:34+08:00',
-                reason: 'vacation'
-            },
-        ]
+        overtime: [],
+        requestOvertime: []
     },
     reducers: {
         setOvertime: (state, action) => {
             state.overtime = action.payload
         },
+
+        addOTRequest: (state, action) => {
+            state.requestOvertime = [...state.requestOvertime, action.payload]
+        },
+
+        approveOTRequest: (state, action) => {
+
+            let idGenerate = Math.floor((Math.random() * 100) + 1);
+
+            console.log({ ...state.requestOvertime[action.payload], id: idGenerate });
+
+            state.overtime.push({ ...state.requestOvertime[action.payload], id: idGenerate })
+
+            state.requestOvertime.splice(action.payload, 1)
+        },
+
+        disapproveOTRequest: (state, action) => {
+            state.requestOvertime.splice(action.payload, 1)
+        },
+
 
         computeTotalOvertime: (state, action) => {
             const { id, companyOvertimeLimit } = action.payload
@@ -53,6 +59,6 @@ export const Overtime = createSlice({
     }
 })
 
-export const { setOvertime, computeTotalOvertime } = Overtime.actions
+export const { setOvertime, addOTRequest, approveOTRequest, disapproveOTRequest, computeTotalOvertime } = Overtime.actions
 
 export default Overtime.reducer

@@ -8,11 +8,31 @@ export const Leaves = createSlice({
         employee: {
             remainingLeaves: 0,
         },
-        leaves: []
+        leaves: [],
+        requestLeaves: [],
     },
     reducers: {
         setLeaves: (state, action) => {
             state.leaves = action.payload
+        },
+
+        addLeaveRequest: (state, action) => {
+            state.requestLeaves = [...state.requestLeaves, action.payload]
+        },
+
+        approveRequest: (state, action) => {
+
+            let idGenerate = Math.floor((Math.random() * 100) + 1);
+
+            console.log({ ...state.requestLeaves[action.payload], id: idGenerate });
+
+            state.leaves.push({ ...state.requestLeaves[action.payload], id: idGenerate })
+
+            state.requestLeaves.splice(action.payload, 1)
+        },
+
+        disapproveRequest: (state, action) => {
+            state.requestLeaves.splice(action.payload, 1)
         },
 
         computeRemainingLeaves: (state, action) => {
@@ -35,6 +55,6 @@ export const Leaves = createSlice({
     }
 })
 
-export const { setLeaves, computeRemainingLeaves } = Leaves.actions
+export const { setLeaves, addLeaveRequest, approveRequest, disapproveRequest, computeRemainingLeaves } = Leaves.actions
 
 export default Leaves.reducer

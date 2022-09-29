@@ -35,7 +35,8 @@ export const CompanyStore = createSlice({
         setCompany: (state, action) => {
             const index = _.findIndex(state.companies, { accountID: action.payload })
 
-            state.company = state.companies[index]
+            state.company = { ...state.companies[index] }
+
         },
 
         addCompany: (state, action) => {
