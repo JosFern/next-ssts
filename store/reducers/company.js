@@ -44,7 +44,9 @@ export const CompanyStore = createSlice({
         },
 
         deleteCompany: (state, action) => {
-            state.companies.splice(action.payload, 1)
+            const index = _.findIndex(state.companies, { accountID: action.payload })
+
+            state.companies.splice(index, 1)
         },
 
         updateCompany: (state, action) => {

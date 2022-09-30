@@ -19,7 +19,7 @@ import { computeTotalAbsences, setAbsences } from '../../store/reducers/absences
 import { addOTRequest, computeTotalOvertime, setOvertime } from '../../store/reducers/overtime';
 import { computeDailyWage, computeMonthlySalary, setCurrentEmployee, setMonthlySalares } from '../../store/reducers/employee';
 import { setCompanies, setCompany } from '../../store/reducers/company';
-import _ from 'lodash';
+import _, { upperCase } from 'lodash';
 import LeavesTable from '../components/LeavesTable';
 import AbsencesTable from '../components/AbsencesTable';
 import OvertimeTable from '../components/OvertimeTable';
@@ -166,7 +166,7 @@ function Employee() {
                     <Box className='flex justify-between items-center gap-3 w-full h-[140px]'>
                         <Box className='bg-[#fba600] justify-center items-center flex p-4 rounded-md gap-3 h-full'>
                             <Link href='../profile'>
-                                <Avatar sx={{ bgcolor: blue[800], width: 80, height: 80, fontSize: '40px' }}>E</Avatar>
+                                <Avatar sx={{ bgcolor: blue[800], width: 80, height: 80, fontSize: '40px' }}>{upperCase(log.loggedIn.firstName[0])}</Avatar>
                             </Link>
 
                             <Box className='flex flex-col gap-2'>

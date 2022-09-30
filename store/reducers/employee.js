@@ -85,6 +85,13 @@ export const EmployeeStore = createSlice({
             state.employees[index] = { ...state.employees[index], employeeType, employeeID, firstName, lastName, associatedCompany, salaryPerHour, position, dailywage, currMonthSal }
         },
 
+        deleteEmployees: (state, action) => {
+            const updateEmp = _.filter(state.employees, emp => action.payload.includes(emp.accountID) ? false : true)
+
+            state.employees = [...updateEmp]
+
+        },
+
         setMonthlySalares: (state, action) => {
             state.monthlySalary = action.payload
         },
@@ -156,6 +163,6 @@ export const EmployeeStore = createSlice({
     }
 })
 
-export const { setEmployees, addEmployee, deleteEmployee, updateEmployee, setCurrentEmployee, setMonthlySalares, computeDailyWage, computeWeekSalary, computeMonthlySalary } = EmployeeStore.actions
+export const { setEmployees, addEmployee, deleteEmployee, updateEmployee, deleteEmployees, setCurrentEmployee, setMonthlySalares, computeDailyWage, computeWeekSalary, computeMonthlySalary } = EmployeeStore.actions
 
 export default EmployeeStore.reducer

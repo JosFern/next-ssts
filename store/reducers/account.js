@@ -70,10 +70,16 @@ export const AccountStore = createSlice({
             const index = _.findIndex(state.accounts, { accountID: id })
 
             state.accounts[index] = { ...state.accounts[index], firstName, email, password }
+        },
+
+        deleteAccounts: (state, action) => {
+            const updateAccounts = _.filter(state.accounts, acc => action.payload.includes(acc.accountID) ? false : true)
+
+            state.accounts = [...updateAccounts]
         }
     }
 })
 
-export const { setAccounts, addAccount, deleteAccount, updateAccount } = AccountStore.actions
+export const { setAccounts, addAccount, deleteAccount, updateAccount, deleteAccounts } = AccountStore.actions
 
 export default AccountStore.reducer

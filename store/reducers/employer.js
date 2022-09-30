@@ -44,10 +44,16 @@ export const EmployerStore = createSlice({
 
             state.employers[index] = { ...state.employers[index], firstName, lastName, email, company }
 
+        },
+
+        deleteEmployers: (state, action) => {
+            const updateEmployers = _.filter(state.employers, emp => action.payload.includes(emp.accountID) ? false : true)
+
+            state.employers = [...updateEmployers]
         }
     }
 })
 
-export const { setEmployers, addEmployer, deleteEmployer, updateEmployer } = EmployerStore.actions
+export const { setEmployers, addEmployer, deleteEmployer, updateEmployer, deleteEmployers } = EmployerStore.actions
 
 export default EmployerStore.reducer

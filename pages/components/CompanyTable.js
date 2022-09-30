@@ -31,7 +31,7 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
 }));
 
 
-export default function CompanyTable({ companies }) {
+export default function CompanyTable({ companies, handleDeleteModal }) {
 
     const router = useRouter()
 
@@ -65,7 +65,7 @@ export default function CompanyTable({ companies }) {
                             <StyledTableCell >
                                 <ButtonGroup variant="contained" aria-label="outlined primary button group">
                                     <Button className='bg-[#33b33d]' color='success' onClick={() => router.push('/company/form?id=' + row.accountID)}>Update</Button>
-                                    <Button onClick={() => dispatch(deleteCompany(index))} className='bg-[#dc3c18]' color='error'>Delete</Button>
+                                    <Button onClick={() => handleDeleteModal(row.accountID)} className='bg-[#dc3c18]' color='error'>Delete</Button>
                                 </ButtonGroup>
                             </StyledTableCell>
                         </StyledTableRow>
