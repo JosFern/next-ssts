@@ -9,7 +9,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import _ from 'lodash';
 import { setLogged } from '../store/reducers/logged';
 import axios from 'axios';
-import * as jose from 'jose'
+import { decryptParams, encryptLoginParams } from '../auth/authParams';
 
 
 export default function Login() {
@@ -24,6 +24,7 @@ export default function Login() {
 
   const router = useRouter()
 
+  //handles user login submition
   const handleSubmit = async (e) => {
     e.preventDefault()
     setLoginError(false)
@@ -31,7 +32,9 @@ export default function Login() {
 
     const credentials = { email, password }
 
-    const login = await axios.post('http://localhost:8080/login', JSON.stringify(credentials))
+    const encryptCredentials = await encryptLoginParams(credentials)
+
+    const login = await axios.post('http://localhost:8080/login', JSON.stringify(encryptCredentials))
       .catch(err => {
         setLoginError(true)
         setMessage(err?.response?.data)
@@ -39,19 +42,18 @@ export default function Login() {
 
     if (login?.status === 200) {
 
-      console.log(login);
+      const account = decryptParams(login.data)
       console.log(login.data);
 
-      // const { accountID, email, firstname, lastname, role } = user
-      // console.log(user);
+      const { email, firstname, lastname, role } = account
 
-      // dispatch(setLogged({ id: accountID, firstName: firstname, lastName: lastname, email: email, role: role }))
+      dispatch(setLogged({ firstName: firstname, lastName: lastname, email: email, role: role, token: login.data }))
 
-      // if (role === 'employer') router.push(`/dashboard`)
+      if (role === 'employer') router.push(`/dashboard`)
 
-      // if (role === 'employee') router.push(`/dashboard?role=${role}`)
+      if (role === 'employee') router.push(`/dashboard?role=${role}`)
 
-      // if (role === 'admin') router.push(`/dashboard?role=${role}`)
+      if (role === 'admin') router.push(`/dashboard?role=${role}`)
     }
 
   }

@@ -18,6 +18,7 @@ import accounts from '../../_sampleData/account';
 import companies from '../../_sampleData/company';
 import { deleteEmployees } from '../../store/reducers/employee';
 import axios from 'axios';
+import { axiosAuth } from '../../auth/authParams';
 
 const style = {
     position: 'absolute',
@@ -66,12 +67,13 @@ function Admin() {
     }, [getEmployerCompany])
 
     const getEmployerCompany = useCallback(async () => {
-        const employers = await axios.get('http://localhost:8080/employers')
+
+        const employers = await axiosAuth(user.loggedIn.token).get('http://localhost:8080/employers')
             .catch(err => console.log("error: " + err))
 
         if (employers.status === 200) dispatch(setEmployers(employers.data))
 
-        const companies = await axios.get('http://localhost:8080/company')
+        const companies = await axiosAuth(user.loggedIn.token).get('http://localhost:8080/company')
             .catch(err => console.log("error: " + err))
 
         if (companies.status === 200) dispatch(setCompanies(companies.data))
