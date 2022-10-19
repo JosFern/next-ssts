@@ -8,47 +8,55 @@ import { Container } from '@mui/material';
 import { useDispatch, useSelector } from 'react-redux';
 import _ from 'lodash';
 import { setLogged } from '../store/reducers/logged';
+import axios from 'axios';
+import * as jose from 'jose'
 
 
 export default function Login() {
 
   const [email, setEmail] = useState('')
   const [password, setPassword] = useState('')
-  const [accountError, setAccountError] = useState(false)
+  const [loginError, setLoginError] = useState(false)
+  const [message, setMessage] = useState("")
 
   const dispatch = useDispatch()
   const acc = useSelector(state => state.account)
 
   const router = useRouter()
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault()
-    setAccountError(false)
+    setLoginError(false)
+    setMessage("")
 
-    const account = _.find(acc.accounts, { email: email, password: password })
+    const credentials = { email, password }
 
-    if (!account) {
-      setAccountError(true)
+    const login = await axios.post('http://localhost:8080/login', JSON.stringify(credentials))
+      .catch(err => {
+        setLoginError(true)
+        setMessage(err?.response?.data)
+      })
 
-    } else {
+    if (login?.status === 200) {
 
-      dispatch(setLogged({ id: account.accountID, firstName: account.firstName, email: email, role: account.type }))
+      console.log(login);
+      console.log(login.data);
 
-      // router.push(`/dashboard`)
+      // const { accountID, email, firstname, lastname, role } = user
+      // console.log(user);
 
-      if (account.type === 'employer') router.push(`/dashboard`)
+      // dispatch(setLogged({ id: accountID, firstName: firstname, lastName: lastname, email: email, role: role }))
 
-      if (account.type === 'employee') router.push(`/dashboard?role=${account.type}`)
+      // if (role === 'employer') router.push(`/dashboard`)
 
-      if (account.type === 'admin') router.push(`/dashboard?role=${account.type}`)
+      // if (role === 'employee') router.push(`/dashboard?role=${role}`)
+
+      // if (role === 'admin') router.push(`/dashboard?role=${role}`)
     }
 
-
-
-
-
-
   }
+
+
   return (
     <Box className='flex justify-center items-center min-h-screen bg-[#f4faec]'>
 
@@ -72,7 +80,7 @@ export default function Login() {
             margin='normal'
             fullWidth
             required
-            error={accountError}
+            error={loginError}
             data-testid="email"
           />
           <TextField
@@ -84,13 +92,13 @@ export default function Login() {
             margin='normal'
             fullWidth
             required
-            error={accountError}
+            error={loginError}
             data-testid="password"
           />
 
-          {accountError &&
+          {loginError &&
             <Typography className='self-center' color='error'>
-              Invalid Account
+              {message}
             </Typography>
           }
 

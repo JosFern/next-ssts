@@ -9,17 +9,12 @@ function Dashboard() {
 
     const router = useRouter()
 
-    if (router?.query?.role === "employee") return (
-        <RequireAuth role={['employee']}>
-            <Employee />
-        </RequireAuth>
-    )
+    if (router.query.role === "employee") return <Employee />
 
-    if (router?.query?.role === "admin") return <Admin role={['admin']} />
+    if (router.query.role === "admin") return <Admin />
 
-    return (
-        <Employer />
-    )
+    if (router.query.role === "employer") return <Employer />
+
 }
 
 export default Dashboard

@@ -43,7 +43,6 @@ export default function CompanyTable({ companies, handleDeleteModal }) {
             <Table sx={{ minWidth: 700 }}>
                 <TableHead>
                     <TableRow>
-                        <StyledTableCell>Account ID</StyledTableCell>
                         <StyledTableCell>Company name</StyledTableCell>
                         <StyledTableCell>Leaves</StyledTableCell>
                         <StyledTableCell>Overtime Limit</StyledTableCell>
@@ -56,16 +55,13 @@ export default function CompanyTable({ companies, handleDeleteModal }) {
                             key={index}
                             sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                         >
-                            <StyledTableCell component="th" scope="row">
-                                {row.accountID}
-                            </StyledTableCell>
                             <StyledTableCell >{row.name}</StyledTableCell>
-                            <StyledTableCell >{row.leaves}</StyledTableCell>
-                            <StyledTableCell >{row.overtimeLimit}</StyledTableCell>
+                            <StyledTableCell >{row.allocateLeaves}</StyledTableCell>
+                            <StyledTableCell >{row.allocateOvertime}</StyledTableCell>
                             <StyledTableCell >
                                 <ButtonGroup variant="contained" aria-label="outlined primary button group">
-                                    <Button className='bg-[#33b33d]' color='success' onClick={() => router.push('/company/form?id=' + row.accountID)}>Update</Button>
-                                    <Button onClick={() => handleDeleteModal(row.accountID)} className='bg-[#dc3c18]' color='error'>Delete</Button>
+                                    <Button className='bg-[#33b33d]' color='success' onClick={() => router.push('/company/form?id=' + row.id)}>Update</Button>
+                                    <Button onClick={() => handleDeleteModal(row.id)} className='bg-[#dc3c18]' color='error'>Delete</Button>
                                 </ButtonGroup>
                             </StyledTableCell>
                         </StyledTableRow>

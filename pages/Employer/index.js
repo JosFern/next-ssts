@@ -115,6 +115,7 @@ function Employer() {
         }
 
         initalizeReducers()
+        console.log("employer page mounted");
 
     }, [dispatch])
 

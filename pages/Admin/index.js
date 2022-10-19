@@ -10,13 +10,14 @@ import _, { filter, upperCase } from 'lodash';
 import { deleteAccount, deleteAccounts, setAccounts } from '../../store/reducers/account';
 import { deleteEmployer, deleteEmployers, setEmployers } from '../../store/reducers/employer';
 import { deleteCompany, setCompanies } from '../../store/reducers/company';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import EmployerTable from '../components/EmpoloyerTable';
 import CompanyTable from '../components/CompanyTable';
 import AccountsTable from '../components/AccountsTable';
 import accounts from '../../_sampleData/account';
 import companies from '../../_sampleData/company';
 import { deleteEmployees } from '../../store/reducers/employee';
+import axios from 'axios';
 
 const style = {
     position: 'absolute',
@@ -54,33 +55,38 @@ function Admin() {
         setTabIndex(newTabIndex);
     };
 
-    const handleDeleteEmployer = (id) => {
-        dispatch(deleteAccount(id))
-        dispatch(deleteEmployer(id))
-    }
+    useEffect(() => {
+        const initializeApi = async () => {
+            getEmployerCompany()
+        }
 
-    // useEffect(() => {
-    //     const initializeReducers = async () => {
-    //         await dispatch(setCompanies(companies))
-    //         await dispatch(setAccounts(accounts))
+        initializeApi()
 
-    //         // dispatch(setEmployers(employers))
-    //     }
+        console.log('useeffect checker');
+    }, [getEmployerCompany])
 
-    //     initializeReducers()
+    const getEmployerCompany = useCallback(async () => {
+        const employers = await axios.get('http://localhost:8080/employers')
+            .catch(err => console.log("error: " + err))
 
-    //     console.log('useeffect checker');
-    // }, [dispatch])
+        if (employers.status === 200) dispatch(setEmployers(employers.data))
+
+        const companies = await axios.get('http://localhost:8080/company')
+            .catch(err => console.log("error: " + err))
+
+        if (companies.status === 200) dispatch(setCompanies(companies.data))
+    }, [dispatch])
+
+    const handleDeleteEmployer = async (id) => {
+        const deleteEmployer = await axios.delete(`http://localhost:8080/employer/${id}`)
+            .catch(err => {
+                setError(true)
+                setMessage(err.response.data)
+            })
+
+        if (deleteEmployer?.status === 200) getEmployerCompany()
 
 
-    const getEmployerCompany = (emplyrs) => {
-
-        const getAssocCompany = _.map(emplyrs, (emplyr) => {
-            const company = _.find(comp.companies, { accountID: emplyr.company })
-            return { ...emplyr, companyName: company.name }
-        })
-
-        return getAssocCompany;
     }
 
     const getAssocEmployers = (companyID) => {
@@ -137,12 +143,12 @@ function Admin() {
                 data-testid="admin-basic-info"
             >
                 <Link href='../profile'>
-                    <Avatar sx={{ bgcolor: green[800], width: 100, height: 100, fontSize: '40px' }}>A</Avatar>
+                    <Avatar sx={{ bgcolor: green[800], width: 100, height: 100, fontSize: '40px' }}>{upperCase(user.loggedIn.firstName[0])}</Avatar>
                 </Link>
 
                 <Box>
                     <Link href='../profile'>
-                        <Typography style={{ cursor: 'pointer' }} mt={2} variant='h4' margin={0} padding={0}>{user.loggedIn.firstName}</Typography>
+                        <Typography style={{ cursor: 'pointer' }} mt={2} variant='h4' margin={0} padding={0}>{user.loggedIn.firstName} {user.loggedIn.lastName}</Typography>
                     </Link>
                     <Typography mb={2}>Admin</Typography>
                     <Box>
@@ -162,22 +168,22 @@ function Admin() {
                     <Tabs value={tabIndex} onChange={handleTabChange}>
                         <Tab label="Employers" />
                         <Tab label="Companies" />
-                        <Tab label="Accounts" />
+                        {/* <Tab label="Accounts" /> */}
                     </Tabs>
                 </Box>
                 <Box>
                     {tabIndex === 0 && (
                         // ---------------EMPLOYERS TABLE------------------
-                        <EmployerTable employers={getEmployerCompany(emplyr.employers)} deleteEmployer={handleDeleteEmployer} />
+                        <EmployerTable employers={emplyr.employers} deleteEmployer={handleDeleteEmployer} />
                     )}
                     {tabIndex === 1 && (
                         // ---------------COMPANIES TABLE------------------
                         <CompanyTable companies={comp.companies} handleDeleteModal={openDeleteCompanyModal} />
                     )}
-                    {tabIndex === 2 && (
+                    {/* {tabIndex === 2 && (
                         // ---------------ACCOUNTS TABLE------------------
                         <AccountsTable accounts={acc.accounts} />
-                    )}
+                    )} */}
                 </Box>
             </Box>
 

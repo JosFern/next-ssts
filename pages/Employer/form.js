@@ -8,27 +8,24 @@ import _ from 'lodash'
 import { useDispatch, useSelector } from 'react-redux';
 import { addEmployer, updateEmployer } from '../../store/reducers/employer';
 import { addAccount, updateAccount } from '../../store/reducers/account';
+import axios from 'axios';
 
 export default function EmployerForm() {
 
     const router = useRouter()
 
     const [employerInfo, setEmployerInfo] = useState({
-        accountID: '',
-        firstName: '',
-        lastName: '',
+        firstname: '',
+        lastname: '',
         email: '',
-        company: '',
+        companyID: '',
         password: '',
         confirmPassword: ''
     })
 
-    const [origEmail, setOrigEmail] = useState('')
-
     const comp = useSelector(state => state.company)
     const acc = useSelector(state => state.account)
     const emp = useSelector(state => state.employer)
-    const dispatch = useDispatch()
 
     const [error, setError] = useState(false)
     const [message, setMessage] = useState('')
@@ -38,24 +35,17 @@ export default function EmployerForm() {
     useEffect(() => {
 
         if (!isFormAdd) {
-            const employer = _.find(emp.employers, { accountID: Number(router?.query?.id) })
-            const passInfo = _.find(acc.accounts, { accountID: Number(router?.query?.id) })
-
-            console.log(emp.employers);
-            console.log(acc.accounts);
-
-            setOrigEmail(employer.email) //FOR VALIDATION IF EMAIL IS STILL THE SAME
+            const employer = _.find(emp.employers, { employerID: router.query.id })
 
             setEmployerInfo({
                 ...employerInfo,
-                accountID: employer.accountID,
-                firstName: employer.firstName,
-                lastName: employer.lastName,
-                company: employer.company,
+                firstname: employer.firstname,
+                lastname: employer.lastname,
+                companyID: employer.companyID,
                 email: employer.email,
 
-                password: passInfo.password,
-                confirmPassword: passInfo.password
+                password: employer.password,
+                confirmPassword: employer.password
 
             })
         }
@@ -74,66 +64,50 @@ export default function EmployerForm() {
     //----------HANDLES FORM VALIDATION EMPLOYER---------------
     const validation = () => {
 
+        if (employerInfo.password.length < 7) return 'Password must be 8 characters or longer!'
+
         if (employerInfo.password !== employerInfo.confirmPassword) return 'Passwords not matched'
-
-        const isExist = _.find(emp.employers, function (employer) {
-            return employer.email === employerInfo.email || employer.accountID === Number(employerInfo.accountID)
-        })
-
-        if (isFormAdd) {
-
-            if (isExist) return 'Account already exist'
-
-        } else {
-
-            if (origEmail !== employerInfo.email) {
-
-                const isEmailExist = _.find(emp.employers, { email: employerInfo.email })
-
-                if (isEmailExist) return 'Account already exist'
-            }
-        }
-
 
         return 'ok'
     }
 
     //----------HANDLES FORM SUBMITION---------------
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault()
         setError(false)
         setMessage('')
 
-        const { accountID, firstName, lastName, email, company, password } = employerInfo;
-
         const message = validation()
 
+        if (message === "ok") {
 
-        if (isFormAdd) {
-            //THIS IS FOR WHEN ADDING NEW EMPLOYER
+            if (isFormAdd) {
+                //THIS IS FOR WHEN ADDING NEW EMPLOYER
 
+                const addEmployer = await axios.post('http://localhost:8080/employer', JSON.stringify(employerInfo))
+                    .catch(err => {
+                        setError(true)
+                        setMessage(err.response.data)
+                    })
 
-            if (message !== 'ok') {
-                setError(true)
-                setMessage(message)
+                if (addEmployer?.status === 201) router.back()
+
             } else {
-                dispatch(addEmployer({ accountID: Number(accountID), firstName, lastName, email, company }))
-                dispatch(addAccount({ accountID: Number(accountID), firstName, email, password, type: 'employer' }))
-                router.back()
-            }
+                //THIS IS FOR WHEN UPDATING EMPLOYER
 
+                const updateEmployer = await axios.put(`http://localhost:8080/employer/${router?.query?.id}`, JSON.stringify(employerInfo))
+                    .catch(err => {
+                        setError(true)
+                        setMessage(err.response.data)
+                    })
+
+                if (updateEmployer?.status === 200) router.back()
+                console.log(updateEmployer);
+
+            }
         } else {
-            //THIS IS FOR WHEN UPDATING EMPLOYER
-
-            if (message !== 'ok') {
-                setError(true)
-                setMessage(message)
-            } else {
-                dispatch(updateEmployer({ id: Number(accountID), firstName, lastName, email, company }))
-                dispatch(updateAccount({ id: Number(accountID), firstName, email, password }))
-                router.back()
-            }
-
+            setError(true)
+            setMessage(message)
         }
 
     }
@@ -151,25 +125,27 @@ export default function EmployerForm() {
                     {isFormAdd ? 'Add Employer' : 'Update Employer'}
                 </Typography>
                 <Box component="form" onSubmit={handleSubmit}>
-                    <TextField
-                        name='accountID'
-                        value={employerInfo.accountID}
-                        onChange={handleChange}
-                        type="number"
-                        label='Account ID'
-                        variant="outlined"
-                        color="secondary"
-                        margin='dense'
-                        fullWidth
-                        required
-                        error={error}
-                        disabled={!isFormAdd}
-                        data-testid="email-input"
-                    />
+
+                    <FormControl required fullWidth margin='dense'>
+                        <InputLabel>Company</InputLabel>
+                        <Select
+                            name='companyID'
+                            label="Employee Type"
+                            disabled={!isFormAdd}
+                            value={employerInfo.companyID}
+                            onChange={handleChange}
+                            data-testid="company-input"
+                        >
+                            {_.map(comp.companies, (company) => (
+                                <MenuItem key={company.id} value={company.id}>{company.name}</MenuItem>
+                            ))}
+                        </Select>
+                    </FormControl>
+
                     <Box className='flex gap-1'>
                         <TextField
-                            name='firstName'
-                            value={employerInfo.firstName}
+                            name='firstname'
+                            value={employerInfo.firstname}
                             onChange={handleChange}
                             type="text"
                             label='First name'
@@ -182,8 +158,8 @@ export default function EmployerForm() {
                             data-testid="firstname-input"
                         />
                         <TextField
-                            name='lastName'
-                            value={employerInfo.lastName}
+                            name='lastname'
+                            value={employerInfo.lastname}
                             onChange={handleChange}
                             type="text"
                             label='Last name'
@@ -207,27 +183,12 @@ export default function EmployerForm() {
                             margin='dense'
                             fullWidth
                             required
+                            disabled={!isFormAdd}
                             error={error}
                             data-testid="email-input"
                         />
 
                     </Box>
-                    <FormControl required fullWidth margin='dense'>
-                        <InputLabel>Company</InputLabel>
-                        <Select
-                            name='company'
-                            label="Employee Type"
-                            disabled={!isFormAdd}
-                            value={employerInfo.company}
-                            onChange={handleChange}
-                            data-testid="company-input"
-                        >
-                            {_.map(comp.companies, (company) => (
-                                <MenuItem key={company.id} value={company.accountID}>{company.name}</MenuItem>
-                            ))}
-                        </Select>
-                    </FormControl>
-
 
                     <TextField
                         name='password'

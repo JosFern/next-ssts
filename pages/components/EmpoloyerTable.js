@@ -39,7 +39,6 @@ export default function EmployerTable({ employers, deleteEmployer }) {
             <Table sx={{ minWidth: 700 }}>
                 <TableHead>
                     <TableRow>
-                        <StyledTableCell>Account ID</StyledTableCell>
                         <StyledTableCell>First Name</StyledTableCell>
                         <StyledTableCell>Last Name</StyledTableCell>
                         <StyledTableCell>Email</StyledTableCell>
@@ -53,17 +52,14 @@ export default function EmployerTable({ employers, deleteEmployer }) {
                             key={index}
                             sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                         >
-                            <StyledTableCell component="th" scope="row">
-                                {row.accountID}
-                            </StyledTableCell>
-                            <StyledTableCell >{row.firstName}</StyledTableCell>
-                            <StyledTableCell >{row.lastName}</StyledTableCell>
+                            <StyledTableCell >{row.firstname}</StyledTableCell>
+                            <StyledTableCell >{row.lastname}</StyledTableCell>
                             <StyledTableCell >{row.email}</StyledTableCell>
-                            <StyledTableCell >{row.companyName}</StyledTableCell>
+                            <StyledTableCell >{row.name}</StyledTableCell>
                             <StyledTableCell >
                                 <ButtonGroup variant="contained" aria-label="outlined primary button group">
-                                    <Button className='bg-[#33b33d]' color='success' onClick={() => router.push('/employer/form?id=' + row.accountID)}>Update</Button>
-                                    <Button className='bg-[#dc3c18]' color='error' onClick={() => deleteEmployer(row.accountID)}>Delete</Button>
+                                    <Button className='bg-[#33b33d]' color='success' onClick={() => router.push('/employer/form?id=' + row.employerID)}>Update</Button>
+                                    <Button className='bg-[#dc3c18]' color='error' onClick={() => deleteEmployer(row.employerID)}>Delete</Button>
                                 </ButtonGroup>
                             </StyledTableCell>
                         </StyledTableRow>

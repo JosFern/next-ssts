@@ -152,6 +152,7 @@ function Employee() {
 
 
         initiateReducers()
+        console.log("employee page mounted");
     }, [dispatch, log, absence.employee.totalAbsences, comp.companies, emp.employees, leave.employee.remainingLeaves, overTime.employee.totalOvertime])
 
 

@@ -3,28 +3,12 @@ import { createSlice } from '@reduxjs/toolkit';
 export const CompanyStore = createSlice({
     name: 'company',
     initialState: {
-        companies: [
-            {
-                id: 1,
-                name: 'Syntactics',
-                leaves: 6,
-                accountID: 1,
-                overtimeLimit: 30
-            },
-            {
-                id: 3,
-                name: 'Lemondrop',
-                leaves: 6,
-                accountID: 3,
-                overtimeLimit: 30
-            }
-        ],
+        companies: [],
         company: {
             id: 0,
             name: '',
-            leaves: 0,
-            accountID: 0,
-            overtimeLimit: 0
+            allocateLeaves: 0,
+            allocateOvertime: 0
         }
     },
     reducers: {
@@ -32,8 +16,8 @@ export const CompanyStore = createSlice({
             state.companies = action.payload
         },
 
-        setCompany: (state, action) => {
-            const index = _.findIndex(state.companies, { accountID: action.payload })
+        setCurrentCompany: (state, action) => {
+            const index = _.findIndex(state.companies, { id: action.payload })
 
             state.company = { ...state.companies[index] }
 
@@ -59,6 +43,6 @@ export const CompanyStore = createSlice({
     }
 })
 
-export const { setCompanies, setCompany, addCompany, deleteCompany, updateCompany } = CompanyStore.actions
+export const { setCompanies, setCurrentCompany, addCompany, deleteCompany, updateCompany } = CompanyStore.actions
 
 export default CompanyStore.reducer
