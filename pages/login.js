@@ -9,7 +9,11 @@ import { useDispatch, useSelector } from 'react-redux';
 import _ from 'lodash';
 import { setLogged } from '../store/reducers/logged';
 import axios from 'axios';
-import { decryptParams, encryptLoginParams } from '../auth/authParams';
+import { encryptParams, verifyParams } from '../auth/authParams';
+// import * as jose from 'jose'
+// import jwt from 'jsonwebtoken';
+// import * as dotenv from 'dotenv';
+// dotenv.config()
 
 
 export default function Login() {
@@ -32,7 +36,7 @@ export default function Login() {
 
     const credentials = { email, password }
 
-    const encryptCredentials = await encryptLoginParams(credentials)
+    const encryptCredentials = await encryptParams(credentials)
 
     const login = await axios.post('http://localhost:8080/login', JSON.stringify(encryptCredentials))
       .catch(err => {
@@ -42,10 +46,14 @@ export default function Login() {
 
     if (login?.status === 200) {
 
-      const account = decryptParams(login.data)
-      console.log(login.data);
+      const payload = await verifyParams(login.data)
+        .catch(err => {
+          console.log(err)
+        })
 
-      const { email, firstname, lastname, role } = account
+      console.log(payload);
+
+      const { email, firstname, lastname, role } = payload
 
       dispatch(setLogged({ firstName: firstname, lastName: lastname, email: email, role: role, token: login.data }))
 

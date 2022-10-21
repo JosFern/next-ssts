@@ -1,31 +1,44 @@
 import axios from 'axios';
 import * as jose from 'jose'
 
-const key = new TextEncoder().encode("login-secret-key");
+export const verifyParams = async (data: string) => {
 
-export const decryptParams = (data: string) => {
-    const claims = jose.decodeJwt(data)
-    console.log(claims)
+    const { payload, protectedHeader }: any = await jose.jwtVerify(new TextEncoder().encode(data), new TextEncoder().encode(process.env.NEXT_PUBLIC_SECRET_KEY), {
+        issuer: 'ssts',
+        audience: 'ssts',
+    })
 
-    const protectedHeader = jose.decodeProtectedHeader(data)
-    console.log(protectedHeader)
+    // console.log(protectedHeader)
+    // console.log(payload.sub)
 
-    return claims
+    // const claims = jose.decodeJwt(data)
+    // console.log(claims)
+
+    // const protectedHeader = jose.decodeProtectedHeader(data)
+    // console.log(protectedHeader)
+
+    return JSON.parse(payload.sub)
 }
 
-export const encryptLoginParams = async (data: object | any) => {
+export const encryptParams = async (data: object | any) => {
+
     const jwt = await new jose.SignJWT({
-        'email': data.email,
-        'password': data.password
+        'urn:example:claim': true,
+        'sub': JSON.stringify(data)
     })
-        .setProtectedHeader({ alg: 'HS256', typ: 'JWT' })
-        .sign(key)
+        .setProtectedHeader({ alg: "HS256", typ: "JWT" })
+        .setIssuedAt()
+        .setIssuer('ssts')
+        .setAudience('ssts')
+        .setExpirationTime('2h')
+        .sign(new TextEncoder().encode(process.env.NEXT_PUBLIC_SECRET_KEY))
 
     return jwt
 }
 
 export const axiosAuth = (token: string) => {
     return axios.create({
+        baseURL: 'http://localhost:8080',
         headers: {
             Authorization: `Bearer ${token}`
         }

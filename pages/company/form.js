@@ -3,17 +3,17 @@ import Container from '@mui/material/Container'
 import Button from '@mui/material/Button';
 import { useRouter } from 'next/router';
 import DashboardLayout from '../components/DashboardLayout'
-import { useEffect, useState } from 'react';
-import { find, isEmpty, lowerCase, replace } from 'lodash'
-import { useDispatch, useSelector } from 'react-redux';
-import axios from 'axios';
-import { setCurrentCompany } from '../../store/reducers/company';
+import { useCallback, useEffect, useState } from 'react';
+import { find, isEmpty } from 'lodash'
+import { useSelector } from 'react-redux';
+import { axiosAuth, encryptParams } from '../../auth/authParams';
 
 export default function CompanyForm() {
 
     const router = useRouter()
 
     const com = useSelector(state => state.company)
+    const user = useSelector(state => state.logged)
 
     const [company, setCompany] = useState({
         name: '',
@@ -27,22 +27,23 @@ export default function CompanyForm() {
 
     const isFormAdd = isEmpty(router?.query)
 
-    const [origName, setOrigName] = useState('')
-
-    const dispatch = useDispatch()
-
     useEffect(() => {
-        if (!isFormAdd) {
-            const comp = find(com.companies, { id: router?.query?.id })
-
-            setCompany({
-                ...company,
-                name: comp.name,
-                allotedleaves: comp.allocateLeaves,
-                overtimelimit: comp.allocateOvertime
-            })
+        if (!isFormAdd && router.isReady) {
+            setCompanyCallback()
         }
-    }, [])
+        console.log('company useeffect checker');
+    }, [isFormAdd, router.isReady, setCompanyCallback])
+
+    const setCompanyCallback = useCallback(() => {
+        const comp = find(com.companies, { id: router?.query?.id })
+
+        setCompany({
+            ...company,
+            name: comp.name,
+            allotedleaves: comp.allocateLeaves,
+            overtimelimit: comp.allocateOvertime
+        })
+    }, [com.companies, company, router?.query?.id])
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -59,20 +60,28 @@ export default function CompanyForm() {
 
         if (isFormAdd) {
 
-            const addCompany = await axios.post('http://localhost:8080/company', JSON.stringify(company))
+            //THIS IS FOR WHEN ADDING NEW COMPANY
+
+            const encryptData = await encryptParams(company)
+
+            const addCompany = await axiosAuth(user.loggedIn.token).post('/company', JSON.stringify(encryptData))
                 .catch(err => {
                     setError(true)
-                    setMessage(err.response.data)
+                    setMessage(err?.response?.data)
                 })
 
             if (addCompany?.status === 201) router.back()
 
         } else {
 
-            const updateCompany = await axios.put(`http://localhost:8080/company/${router?.query?.id}`, JSON.stringify(company))
+            //THIS IS FOR WHEN UPDATING COMPANY
+
+            const encryptData = await encryptParams(company)
+
+            const updateCompany = await axiosAuth(user.loggedIn.token).put(`/company/${router?.query?.id}`, JSON.stringify(encryptData))
                 .catch(err => {
                     setError(true)
-                    setMessage(err.response.data)
+                    setMessage(err?.response?.data)
                 })
 
             if (updateCompany?.status === 200) router.back()

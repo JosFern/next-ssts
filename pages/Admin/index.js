@@ -18,7 +18,7 @@ import accounts from '../../_sampleData/account';
 import companies from '../../_sampleData/company';
 import { deleteEmployees } from '../../store/reducers/employee';
 import axios from 'axios';
-import { axiosAuth } from '../../auth/authParams';
+import { axiosAuth, verifyParams } from '../../auth/authParams';
 
 const style = {
     position: 'absolute',
@@ -40,7 +40,7 @@ function Admin() {
     const comp = useSelector(state => state.company)
     const emplyr = useSelector(state => state.employer)
     const user = useSelector(state => state.logged)
-    const acc = useSelector(state => state.account)
+    // const acc = useSelector(state => state.account)
     const emp = useSelector(state => state.employee)
     const dispatch = useDispatch()
 
@@ -52,6 +52,7 @@ function Admin() {
 
     const [tabIndex, setTabIndex] = useState(0);
 
+    //HANDESL TAB CHANGE
     const handleTabChange = (event, newTabIndex) => {
         setTabIndex(newTabIndex);
     };
@@ -66,21 +67,30 @@ function Admin() {
         console.log('useeffect checker');
     }, [getEmployerCompany])
 
+    //USE TO GET EMPLOYERS AND COMPANIES DATA
     const getEmployerCompany = useCallback(async () => {
 
-        const employers = await axiosAuth(user.loggedIn.token).get('http://localhost:8080/employers')
+        const companies = await axiosAuth(user.loggedIn.token).get('/company')
             .catch(err => console.log("error: " + err))
 
-        if (employers.status === 200) dispatch(setEmployers(employers.data))
+        if (companies.status === 200) {
+            const data = await verifyParams(companies.data)
+            dispatch(setCompanies(data))
+        }
 
-        const companies = await axiosAuth(user.loggedIn.token).get('http://localhost:8080/company')
+        const employers = await axiosAuth(user.loggedIn.token).get('/employer')
             .catch(err => console.log("error: " + err))
 
-        if (companies.status === 200) dispatch(setCompanies(companies.data))
-    }, [dispatch])
+        if (employers.status === 200) {
+            const data = await verifyParams(employers.data)
+            dispatch(setEmployers(data))
+        }
+    }, [dispatch, user.loggedIn.token])
 
+    //HANDLES EMPLOYER DELETION
     const handleDeleteEmployer = async (id) => {
-        const deleteEmployer = await axios.delete(`http://localhost:8080/employer/${id}`)
+
+        const deleteEmployer = await axiosAuth(user.loggedIn.token).delete(`/employer/${id}`)
             .catch(err => {
                 setError(true)
                 setMessage(err.response.data)
@@ -91,18 +101,21 @@ function Admin() {
 
     }
 
+    //HANDLES GETTING EMPLOYERS ASSOCIATED COMPANY
     const getAssocEmployers = (companyID) => {
         const employers = _.filter(emplyr.employers, { company: companyID })
 
         return employers
     }
 
+    //HANDLES GETTING EMPLOYEES ASSOCIATED COMPANY
     const getAssocEmployees = (companyID) => {
         const employees = _.filter(emp.employees, { associatedCompany: companyID })
 
         return employees
     }
 
+    //OPENS DELETE COMPANY MODAL
     const openDeleteCompanyModal = (companyID) => {
         setDeleteCompModal(true)
 
@@ -115,6 +128,7 @@ function Admin() {
 
     }
 
+    //HANDLES COMPANY DELETION
     const handleDeleteCompanySubmit = (e) => {
         e.preventDefault()
 

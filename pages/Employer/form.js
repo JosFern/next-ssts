@@ -3,12 +3,13 @@ import Container from '@mui/material/Container'
 import Button from '@mui/material/Button';
 import { useRouter } from 'next/router';
 import DashboardLayout from '../components/DashboardLayout'
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import _ from 'lodash'
 import { useDispatch, useSelector } from 'react-redux';
 import { addEmployer, updateEmployer } from '../../store/reducers/employer';
 import { addAccount, updateAccount } from '../../store/reducers/account';
 import axios from 'axios';
+import { axiosAuth, encryptParams } from '../../auth/authParams';
 
 export default function EmployerForm() {
 
@@ -24,8 +25,9 @@ export default function EmployerForm() {
     })
 
     const comp = useSelector(state => state.company)
-    const acc = useSelector(state => state.account)
+    // const acc = useSelector(state => state.account)
     const emp = useSelector(state => state.employer)
+    const user = useSelector(state => state.logged)
 
     const [error, setError] = useState(false)
     const [message, setMessage] = useState('')
@@ -33,25 +35,28 @@ export default function EmployerForm() {
     const isFormAdd = _.isEmpty(router?.query)
 
     useEffect(() => {
-
-        if (!isFormAdd) {
-            const employer = _.find(emp.employers, { employerID: router.query.id })
-
-            setEmployerInfo({
-                ...employerInfo,
-                firstname: employer.firstname,
-                lastname: employer.lastname,
-                companyID: employer.companyID,
-                email: employer.email,
-
-                password: employer.password,
-                confirmPassword: employer.password
-
-            })
+        if (!isFormAdd && router.isReady) {
+            setEmployerCallback()
         }
 
-        console.log('useeffect checker');
-    }, [isFormAdd])
+        console.log('employer useeffect checker');
+    }, [isFormAdd, router.isReady, setEmployerCallback])
+
+    const setEmployerCallback = useCallback(() => {
+        const employer = _.find(emp.employers, { employerID: router?.query?.id })
+
+        setEmployerInfo({
+            ...employerInfo,
+            firstname: employer.firstname,
+            lastname: employer.lastname,
+            companyID: employer.companyID,
+            email: employer.email,
+
+            password: employer.password,
+            confirmPassword: employer.password
+
+        })
+    }, [employerInfo, emp.employers, router?.query?.id])
 
     const handleChange = (e) => {
         const { name, value } = e.target
@@ -82,12 +87,15 @@ export default function EmployerForm() {
         if (message === "ok") {
 
             if (isFormAdd) {
+
                 //THIS IS FOR WHEN ADDING NEW EMPLOYER
 
-                const addEmployer = await axios.post('http://localhost:8080/employer', JSON.stringify(employerInfo))
+                const encryptData = await encryptParams(employerInfo)
+
+                const addEmployer = await axiosAuth(user.loggedIn.token).post('/employer', JSON.stringify(encryptData))
                     .catch(err => {
                         setError(true)
-                        setMessage(err.response.data)
+                        setMessage(err?.response?.data)
                     })
 
                 if (addEmployer?.status === 201) router.back()
@@ -95,14 +103,15 @@ export default function EmployerForm() {
             } else {
                 //THIS IS FOR WHEN UPDATING EMPLOYER
 
-                const updateEmployer = await axios.put(`http://localhost:8080/employer/${router?.query?.id}`, JSON.stringify(employerInfo))
+                const encryptData = await encryptParams(employerInfo)
+
+                const updateEmployer = await axiosAuth(user.loggedIn.token).put(`/employer/${router?.query?.id}`, JSON.stringify(encryptData))
                     .catch(err => {
                         setError(true)
-                        setMessage(err.response.data)
+                        setMessage(err?.response?.data)
                     })
 
                 if (updateEmployer?.status === 200) router.back()
-                console.log(updateEmployer);
 
             }
         } else {
