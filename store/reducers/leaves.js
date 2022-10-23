@@ -16,6 +16,13 @@ export const Leaves = createSlice({
             state.leaves = action.payload
         },
 
+        setRemainingLeaves: (state, action) => {
+            const { remainingLeaves } = action.payload
+
+            state.employee.remainingLeaves = remainingLeaves
+        },
+
+        //-------------------------------------------------------
         addLeaveRequest: (state, action) => {
             state.requestLeaves = [...state.requestLeaves, action.payload]
         },
@@ -55,6 +62,6 @@ export const Leaves = createSlice({
     }
 })
 
-export const { setLeaves, addLeaveRequest, approveRequest, disapproveRequest, computeRemainingLeaves } = Leaves.actions
+export const { setLeaves, setRemainingLeaves, addLeaveRequest, approveRequest, disapproveRequest, computeRemainingLeaves } = Leaves.actions
 
 export default Leaves.reducer

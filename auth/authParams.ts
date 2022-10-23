@@ -6,7 +6,7 @@ export const verifyParams = async (data: string) => {
     const { payload, protectedHeader }: any = await jose.jwtVerify(new TextEncoder().encode(data), new TextEncoder().encode(process.env.NEXT_PUBLIC_SECRET_KEY), {
         issuer: 'ssts',
         audience: 'ssts',
-    })
+    }).catch(err => console.log('error: ' + err))
 
     // console.log(protectedHeader)
     // console.log(payload.sub)

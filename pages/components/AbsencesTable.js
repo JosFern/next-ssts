@@ -38,7 +38,6 @@ export default function AbsencesTable(props) {
                 <TableRow>
                     <StyledTableCell>Date Started</StyledTableCell>
                     <StyledTableCell>Date Ended</StyledTableCell>
-                    <StyledTableCell>Reason</StyledTableCell>
                 </TableRow>
             </TableHead>
             <TableBody>
@@ -47,9 +46,8 @@ export default function AbsencesTable(props) {
                         key={index}
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
-                        <StyledTableCell >{format(parseISO(row.dateStarted), 'PPpp')}</StyledTableCell>
-                        <StyledTableCell >{format(parseISO(row.dateEnded), 'PPpp')}</StyledTableCell>
-                        <StyledTableCell >{row.reason}</StyledTableCell>
+                        <StyledTableCell >{format(parseISO(row.dateStart), 'PPpp')}</StyledTableCell>
+                        <StyledTableCell >{format(parseISO(row.dateEnd), 'PPpp')}</StyledTableCell>
                     </StyledTableRow>
                 ))}
             </TableBody>

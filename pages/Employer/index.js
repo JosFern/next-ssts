@@ -12,15 +12,16 @@ import DashboardLayout from '../components/DashboardLayout'
 import MeetingRoomIcon from '@mui/icons-material/MeetingRoom';
 import MoreTimeIcon from '@mui/icons-material/MoreTime';
 import { useDispatch, useSelector } from 'react-redux';
-import _, { upperCase } from 'lodash';
-import { useEffect, useState } from 'react';
-import { deleteEmployee, setEmployees } from '../../store/reducers/employee';
+import _, { filter, map, upperCase } from 'lodash';
+import { useCallback, useEffect, useState } from 'react';
+import employee, { deleteEmployee, setEmployees } from '../../store/reducers/employee';
 import { deleteAccount } from '../../store/reducers/account';
-import { setCompanies, setCompany } from '../../store/reducers/company';
+import { setCompany } from '../../store/reducers/company';
 import BusinessIcon from '@mui/icons-material/Business';
 import { format, parseISO } from 'date-fns';
 import { approveRequest, disapproveRequest } from '../../store/reducers/leaves';
 import { approveOTRequest, disapproveOTRequest } from '../../store/reducers/overtime';
+import { axiosAuth, verifyParams } from '../../auth/authParams';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -49,7 +50,6 @@ function Employer() {
 
     const router = useRouter()
 
-    const emplyr = useSelector(state => state.employer)
     const user = useSelector(state => state.logged)
     const emp = useSelector(state => state.employee)
     const comp = useSelector(state => state.company)
@@ -62,66 +62,49 @@ function Employer() {
         setTabIndex(newTabIndex);
     };
 
-
     const dispatch = useDispatch()
 
-    const employees = [
-        //sample employee data
-        {
-            employeeType: 'fulltime',
-            accountID: 5,
-            employeeID: 102,
-            firstName: 'jose',
-            lastName: 'Basic',
-            position: 'intern',
-            associatedCompany: 1,
-            salaryPerHour: 10,
-            dailyWage: 0,
-            currMonthSal: 0
-        },
-        {
-            employeeType: 'fulltime',
-            accountID: 6,
-            employeeID: 103,
-            firstName: 'Joselito',
-            lastName: 'Basic',
-            position: 'intern',
-            associatedCompany: 1,
-            salaryPerHour: 15,
-            dailyWage: 0,
-            currMonthSal: 0
-        },
-        {
-            employeeType: 'fulltime',
-            accountID: 1,
-            employeeID: 101,
-            firstName: 'Employee',
-            lastName: 'employee',
-            position: 'developer',
-            associatedCompany: 1,
-            salaryPerHour: 20,
-            dailyWage: 0,
-            currMonthSal: 0
-        },
-    ]
-
     useEffect(() => {
-        const initalizeReducers = async () => {
-            // await dispatch(setEmployees(employees))
-
-            const currEmployer = _.find(emplyr.employers, { accountID: user.loggedIn.id })
-
-            dispatch(setCompany(currEmployer?.company))
+        const initializeApi = async () => {
+            await getEmployerInfo()
+            await getEmployeesInfo()
         }
 
-        initalizeReducers()
+        initializeApi()
         console.log("employer page mounted");
 
-    }, [dispatch])
+    }, [dispatch, getEmployerInfo, getEmployeesInfo])
 
-    const deleteEmployeeInfo = (accountID) => {
-        dispatch(deleteEmployee(accountID))
-        dispatch(deleteAccount(accountID))
+    //HANDLES GETTING EMPLOYER ADDITIONAL INFO
+    const getEmployerInfo = useCallback(async () => {
+        const employer = await axiosAuth(user.loggedIn.token).get(`/employer/${user.loggedIn.id}`)
+            .catch(err => console.log("error: " + err))
+
+        if (employer.status === 200) {
+            const data = await verifyParams(employer.data)
+            dispatch(setCompany(data))
+        }
+
+    }, [dispatch, user.loggedIn.token, user.loggedIn.id])
+
+    //HANDLES GETTING COMPANY EMPLOYEES
+    const getEmployeesInfo = useCallback(async () => {
+        const employees = await axiosAuth(user.loggedIn.token).get('/employee')
+            .catch(err => console.log("error: " + err))
+
+        if (employees.status === 200) {
+            const data = await verifyParams(employees.data)
+            const filterEmployees = filter(data, { companyID: comp.company.id })
+            dispatch(setEmployees(filterEmployees))
+        }
+    }, [dispatch, user.loggedIn.token, comp.company.id])
+
+    //HANDLES EMPLOYEE DELETION
+    const deleteEmployeeInfo = async (id) => {
+        const deleteEmployee = await axiosAuth(user.loggedIn.token).delete(`/employee/${id}`)
+            .catch(err => console.log("error: " + err))
+
+        if (deleteEmployee?.status === 200) getEmployeesInfo()
     }
 
     const getEmployeeLeaveRequests = (leaves) => {
@@ -135,11 +118,6 @@ function Employer() {
 
         }).filter((leave) => { return leave }).value()
 
-        // const getAssocCompany = _.filter(leaves, (leave) => {
-        //     const employee = _.find(emp.employees, { accountID: leave.employeeId })
-        //     return employee?.associatedCompany === comp.company.accountID
-        // })
-
         return getAssocEmp;
     }
 
@@ -152,11 +130,6 @@ function Employer() {
             }
             return null
         }).filter((overtime) => { return overtime }).value()
-
-        // const getAssocCompany = _.filter(overtimes, (overtime) => {
-        //     const employee = _.find(emp.employees, { accountID: overtime.employeeId })
-        //     return employee?.associatedCompany === comp.company.accountID
-        // })
 
         return getAssocEmp;
     }
@@ -176,7 +149,7 @@ function Employer() {
 
                     <Box>
                         <Link href='../profile'>
-                            <Typography data-testid="name" style={{ cursor: 'pointer' }} mt={2} variant='h5' margin={0} padding={0}>{user.loggedIn.firstName}</Typography>
+                            <Typography data-testid="name" style={{ cursor: 'pointer' }} mt={2} variant='h5' margin={0} padding={0}>{user.loggedIn.firstName} {user.loggedIn.lastName}</Typography>
                         </Link>
                         <Typography mt={2} mb={2}>Employer</Typography>
                         <Button data-testid="add-employer" className='bg-[#44bd32] text-white hover:bg-[#4cd137]' onClick={() => router.push('/employee/form')} variant='contained'>+ Add Employee</Button>
@@ -186,11 +159,11 @@ function Employer() {
 
                 <Box className='bg-[#8e44ad] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
                     <MeetingRoomIcon sx={{ width: 70, height: 70 }} />
-                    <Typography data-testid="leaves" mt={2} variant='h5' >Leaves: {comp.company?.leaves}</Typography>
+                    <Typography data-testid="leaves" mt={2} variant='h5' >Leaves: {comp.company?.allocateLeaves}</Typography>
                 </Box>
                 <Box className='bg-[#0097e6] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
                     <MoreTimeIcon sx={{ width: 70, height: 70 }} />
-                    <Typography data-testid="overtime-limit" mt={2} variant='h5' >Overtime Limit: {comp.company?.overtimeLimit} hrs</Typography>
+                    <Typography data-testid="overtime-limit" mt={2} variant='h5' >Overtime Limit: {comp.company?.allocateOvertime} hrs</Typography>
                 </Box>
 
                 <Box className='bg-[#d35400] flex flex-col justify-center items-center grow p-4 rounded-md h-full'>
@@ -216,8 +189,6 @@ function Employer() {
                             <Table sx={{ minWidth: 700 }}>
                                 <TableHead>
                                     <TableRow>
-                                        <StyledTableCell>Account ID</StyledTableCell>
-                                        <StyledTableCell>Employee ID</StyledTableCell>
                                         <StyledTableCell>First Name</StyledTableCell>
                                         <StyledTableCell>Last Name</StyledTableCell>
                                         <StyledTableCell>Position</StyledTableCell>
@@ -227,29 +198,23 @@ function Employer() {
                                     </TableRow>
                                 </TableHead>
                                 <TableBody>
-                                    {_.map(_.filter(emp.employees, { associatedCompany: comp.company?.accountID }), (row, index) => (
+                                    {map(emp.employees, (row, index) => (
                                         <StyledTableRow
                                             key={index}
                                             sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                                         >
                                             <StyledTableCell>
-                                                {row.accountID}
+                                                {row.firstname}
                                             </StyledTableCell>
-                                            <StyledTableCell>
-                                                {row.employeeID}
-                                            </StyledTableCell>
-                                            <StyledTableCell>
-                                                {row.firstName}
-                                            </StyledTableCell>
-                                            <StyledTableCell >{row.lastName}</StyledTableCell>
-                                            <StyledTableCell >{row.position}</StyledTableCell>
-                                            <StyledTableCell >{row.salaryPerHour}</StyledTableCell>
-                                            <StyledTableCell >{row.employeeType === 'fulltime' ? 'Full Time' : 'Part Time'}</StyledTableCell>
+                                            <StyledTableCell >{row.lastname}</StyledTableCell>
+                                            <StyledTableCell >{row.pos}</StyledTableCell>
+                                            <StyledTableCell >{row.rate}</StyledTableCell>
+                                            <StyledTableCell >{row.empType === 'fulltime' ? 'Full Time' : 'Part Time'}</StyledTableCell>
                                             <StyledTableCell >
                                                 <ButtonGroup variant="contained">
-                                                    <Button className='bg-[#0e79e1]' color='info' onClick={() => router.push('/employee/' + row.accountID)} >Info</Button>
-                                                    <Button className='bg-[#33b33d]' color='success' onClick={() => router.push('/employee/form?id=' + row.accountID)}>Update</Button>
-                                                    <Button onClick={() => deleteEmployeeInfo(row.accountID)} className='bg-[#dc3c18]' color='error'>Delete</Button>
+                                                    <Button className='bg-[#0e79e1]' color='info' onClick={() => router.push('/employee/' + row.employeeID)} >Info</Button>
+                                                    <Button className='bg-[#33b33d]' color='success' onClick={() => router.push('/employee/form?id=' + row.employeeID)}>Update</Button>
+                                                    <Button onClick={() => deleteEmployeeInfo(row.employeeID)} className='bg-[#dc3c18]' color='error'>Delete</Button>
                                                 </ButtonGroup>
                                             </StyledTableCell>
                                         </StyledTableRow>
@@ -259,7 +224,7 @@ function Employer() {
                         </TableContainer>
                     )}
                     {/*----------------------LIST OF REQUEST LEAVES TAB--------------------- */}
-                    {tabIndex === 1 && (
+                    {/* {tabIndex === 1 && (
                         <TableContainer component={Paper} data-testid="employer-table">
                             <Table sx={{ minWidth: 700 }}>
                                 <TableHead>
@@ -294,9 +259,9 @@ function Employer() {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                    )}
+                    )} */}
                     {/*----------------------LIST OF REQUEST OVERTIME TAB--------------------- */}
-                    {tabIndex === 2 && (
+                    {/* {tabIndex === 2 && (
                         <TableContainer component={Paper} data-testid="employer-table">
                             <Table sx={{ minWidth: 700 }}>
                                 <TableHead>
@@ -331,7 +296,7 @@ function Employer() {
                                 </TableBody>
                             </Table>
                         </TableContainer>
-                    )}
+                    )} */}
 
                 </Box>
             </Box>

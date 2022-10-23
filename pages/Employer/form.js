@@ -114,6 +114,7 @@ export default function EmployerForm() {
                 if (updateEmployer?.status === 200) router.back()
 
             }
+
         } else {
             setError(true)
             setMessage(message)

@@ -48,8 +48,8 @@ export default function LeavesTable(props) {
                         key={index}
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
-                        <StyledTableCell >{format(parseISO(row.dateStarted), 'PPpp')}</StyledTableCell>
-                        <StyledTableCell >{format(parseISO(row.dateEnded), 'PPpp')}</StyledTableCell>
+                        <StyledTableCell >{format(parseISO(row.datestart), 'PPpp')}</StyledTableCell>
+                        <StyledTableCell >{format(parseISO(row.dateend), 'PPpp')}</StyledTableCell>
                         <StyledTableCell >{row.reason}</StyledTableCell>
                     </StyledTableRow>
                 ))}

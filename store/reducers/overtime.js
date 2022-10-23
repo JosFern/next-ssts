@@ -16,6 +16,13 @@ export const Overtime = createSlice({
             state.overtime = action.payload
         },
 
+        setTotalOvertime: (state, action) => {
+            const { totalOvertime } = action.payload
+
+            state.employee.totalOvertime = totalOvertime
+        },
+
+        //----------------------------------------------------------
         addOTRequest: (state, action) => {
             state.requestOvertime = [...state.requestOvertime, action.payload]
         },
@@ -59,6 +66,6 @@ export const Overtime = createSlice({
     }
 })
 
-export const { setOvertime, addOTRequest, approveOTRequest, disapproveOTRequest, computeTotalOvertime } = Overtime.actions
+export const { setOvertime, setTotalOvertime, addOTRequest, approveOTRequest, disapproveOTRequest, computeTotalOvertime } = Overtime.actions
 
 export default Overtime.reducer

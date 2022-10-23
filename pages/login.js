@@ -48,9 +48,9 @@ export default function Login() {
 
       console.log(payload);
 
-      const { email, firstname, lastname, role } = payload
+      const { accountID, email, firstname, lastname, role } = payload
 
-      dispatch(setLogged({ firstName: firstname, lastName: lastname, email: email, role: role, token: login.data }))
+      dispatch(setLogged({ id: accountID, firstName: firstname, lastName: lastname, email: email, role: role, token: login.data }))
 
       if (role === 'employer') router.push(`/dashboard`)
 

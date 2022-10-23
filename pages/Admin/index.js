@@ -59,24 +59,17 @@ function Admin() {
 
     useEffect(() => {
         const initializeApi = async () => {
-            getEmployerCompany()
+            await getCompanies()
+            await getEmployers()
         }
 
         initializeApi()
 
         console.log('useeffect checker');
-    }, [getEmployerCompany])
+    }, [getEmployers, getCompanies])
 
-    //USE TO GET EMPLOYERS AND COMPANIES DATA
-    const getEmployerCompany = useCallback(async () => {
-
-        const companies = await axiosAuth(user.loggedIn.token).get('/company')
-            .catch(err => console.log("error: " + err))
-
-        if (companies.status === 200) {
-            const data = await verifyParams(companies.data)
-            dispatch(setCompanies(data))
-        }
+    //USE TO GET EMPLOYERS DATA
+    const getEmployers = useCallback(async () => {
 
         const employers = await axiosAuth(user.loggedIn.token).get('/employer')
             .catch(err => console.log("error: " + err))
@@ -87,16 +80,25 @@ function Admin() {
         }
     }, [dispatch, user.loggedIn.token])
 
+    //USE TO GET COMPANIES DATA
+    const getCompanies = useCallback(async () => {
+
+        const companies = await axiosAuth(user.loggedIn.token).get('/company')
+            .catch(err => console.log("error: " + err))
+
+        if (companies.status === 200) {
+            const data = await verifyParams(companies.data)
+            dispatch(setCompanies(data))
+        }
+    }, [dispatch, user.loggedIn.token])
+
     //HANDLES EMPLOYER DELETION
     const handleDeleteEmployer = async (id) => {
 
         const deleteEmployer = await axiosAuth(user.loggedIn.token).delete(`/employer/${id}`)
-            .catch(err => {
-                setError(true)
-                setMessage(err.response.data)
-            })
+            .catch(err => console.log("error: " + err))
 
-        if (deleteEmployer?.status === 200) getEmployerCompany()
+        if (deleteEmployer?.status === 200) getEmployers()
 
 
     }

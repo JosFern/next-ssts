@@ -5,55 +5,14 @@ import _ from 'lodash';
 export const EmployeeStore = createSlice({
     name: 'employee',
     initialState: {
-        employees: [
-            //sample employee data
-            {
-                employeeType: 'fulltime',
-                accountID: 5,
-                employeeID: 102,
-                firstName: 'jose',
-                lastName: 'Basic',
-                position: 'intern',
-                associatedCompany: 1,
-                salaryPerHour: 10,
-                dailyWage: 0,
-                currMonthSal: 0
-            },
-            {
-                employeeType: 'fulltime',
-                accountID: 6,
-                employeeID: 103,
-                firstName: 'Joselito',
-                lastName: 'Basic',
-                position: 'intern',
-                associatedCompany: 1,
-                salaryPerHour: 15,
-                dailyWage: 0,
-                currMonthSal: 0
-            },
-            {
-                employeeType: 'fulltime',
-                accountID: 1,
-                employeeID: 101,
-                firstName: 'Employee',
-                lastName: 'employee',
-                position: 'developer',
-                associatedCompany: 1,
-                salaryPerHour: 20,
-                dailyWage: 0,
-                currMonthSal: 0
-            },
-        ],
+        employees: [],
         monthlySalary: [],
         employee: {
-            employeeType: '',
-            accountID: 0,
-            employeeID: 0,
-            firstName: '',
-            lastName: '',
-            position: '',
-            associatedCompany: 0,
-            salaryPerHour: 0,
+            empType: '',
+            firstname: '',
+            lastname: '',
+            pos: '',
+            rate: 0,
             dailyWage: 0,
             currMonthSal: 0
         }
@@ -61,6 +20,31 @@ export const EmployeeStore = createSlice({
     reducers: {
         setEmployees: (state, action) => {
             state.employees = action.payload
+        },
+
+        setDailyWage: (state, action) => {
+            const { dailywage } = action.payload
+
+            state.employee.dailyWage = dailywage
+        },
+
+        setCurrentMonthlySalary: (state, action) => {
+            const { monthlySalary } = action.payload
+
+            state.employee.currMonthSal = monthlySalary
+        },
+
+        //-----------------------------------------------------------------------------
+        computeWeekSalary: (state, action) => {
+            const { id, overtimeLimit, workDays, workingHours } = action.payload
+
+            const totalAbsences = state.employees[id].absences - state.employees[id].leaves
+
+            const paidDays = workDays - totalAbsences
+
+            const totalHours = paidDays * workingHours
+
+            state.overtime[id].overtimeID = totalHours + Math.min(state.employees[id].overtime, overtimeLimit)
         },
 
         addEmployee: (state, action) => {
@@ -74,7 +58,8 @@ export const EmployeeStore = createSlice({
         },
 
         setCurrentEmployee: (state, action) => {
-            state.employee = { ...action.payload }
+            const { firstname, lastname, email, rate, empType, pos } = action.payload
+            state.employee = { ...state.employee, firstname, lastname, email, rate, empType, pos }
         },
 
         updateEmployee: (state, action) => {
@@ -94,37 +79,6 @@ export const EmployeeStore = createSlice({
 
         setMonthlySalares: (state, action) => {
             state.monthlySalary = action.payload
-        },
-
-        computeWeekSalary: (state, action) => {
-            const { id, overtimeLimit, workDays, workingHours } = action.payload
-
-            const totalAbsences = state.employees[id].absences - state.employees[id].leaves
-
-            const paidDays = workDays - totalAbsences
-
-            const totalHours = paidDays * workingHours
-
-            state.overtime[id].overtimeID = totalHours + Math.min(state.employees[id].overtime, overtimeLimit)
-        },
-
-        computeDailyWage: (state, action) => {
-            const { id } = action.payload
-
-            const index = _.findIndex(state.employees, { accountID: id })
-
-            const { salaryPerHour } = state.employees[index]
-
-            let dailyWorkHours = 4; //working hours in a day
-
-            if (state.employees[index].employeeType === 'fulltime') dailyWorkHours = 8;
-
-            state.employees[index].dailyWage = salaryPerHour * dailyWorkHours
-
-            // console.log('daily wage: ' + (salaryPerHour * dailyWorkHours));
-
-
-            state.employee = { ...state.employee, dailyWage: salaryPerHour * dailyWorkHours }
         },
 
         computeMonthlySalary: (state, action) => {
@@ -163,6 +117,6 @@ export const EmployeeStore = createSlice({
     }
 })
 
-export const { setEmployees, addEmployee, deleteEmployee, updateEmployee, deleteEmployees, setCurrentEmployee, setMonthlySalares, computeDailyWage, computeWeekSalary, computeMonthlySalary } = EmployeeStore.actions
+export const { setEmployees, addEmployee, setCurrentMonthlySalary, deleteEmployee, updateEmployee, deleteEmployees, setCurrentEmployee, setMonthlySalares, setDailyWage, computeWeekSalary, computeMonthlySalary } = EmployeeStore.actions
 
 export default EmployeeStore.reducer

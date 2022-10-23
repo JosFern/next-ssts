@@ -36,8 +36,9 @@ export default function OvertimeTable(props) {
         <Table sx={{ minWidth: 700 }}>
             <TableHead>
                 <TableRow>
-                    <StyledTableCell>Date Started</StyledTableCell>
-                    <StyledTableCell>Date Ended</StyledTableCell>
+                    <StyledTableCell>Date Happen</StyledTableCell>
+                    <StyledTableCell>Time Started</StyledTableCell>
+                    <StyledTableCell>Time Ended</StyledTableCell>
                     <StyledTableCell>Reason</StyledTableCell>
                 </TableRow>
             </TableHead>
@@ -47,8 +48,9 @@ export default function OvertimeTable(props) {
                         key={index}
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
-                        <StyledTableCell >{format(parseISO(row.dateStarted), 'PPpp')}</StyledTableCell>
-                        <StyledTableCell >{format(parseISO(row.dateEnded), 'PPpp')}</StyledTableCell>
+                        <StyledTableCell >{format(parseISO(row.dateHappen), 'PPpp')}</StyledTableCell>
+                        <StyledTableCell >{format(parseISO(row.timeStart), 'PPpp')}</StyledTableCell>
+                        <StyledTableCell >{format(parseISO(row.timeEnd), 'PPpp')}</StyledTableCell>
                         <StyledTableCell >{row.reason}</StyledTableCell>
                     </StyledTableRow>
                 ))}

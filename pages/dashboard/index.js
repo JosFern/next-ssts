@@ -9,11 +9,13 @@ function Dashboard() {
 
     const router = useRouter()
 
-    if (router.query.role === "employee") return <Employee />
-
-    if (router.query.role === "admin") return <Admin />
-
-    if (router.query.role === "employer") return <Employer />
+    if (router.query.role === "admin") {
+        return <Admin />
+    } else if (router.query.role === "employee") {
+        return <Employee />
+    } else {
+        return <Employer />
+    }
 
 }
 

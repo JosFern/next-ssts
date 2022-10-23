@@ -5,6 +5,7 @@ export const loggedStore = createSlice({
     name: 'logged',
     initialState: {
         loggedIn: {
+            id: '',
             firstName: '',
             lastName: '',
             email: '',

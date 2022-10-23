@@ -9,24 +9,21 @@ import AccountBalanceIcon from '@mui/icons-material/AccountBalance';
 import MoreTimeIcon from '@mui/icons-material/MoreTime';
 import PaidIcon from '@mui/icons-material/Paid';
 import { useDispatch, useSelector } from 'react-redux';
-import { useEffect, useState } from 'react';
+import { useCallback, useEffect, useState } from 'react';
 import _ from 'lodash';
 import { useRouter } from 'next/router';
-import { computeRemainingLeaves, setLeaves } from '../../store/reducers/leaves';
-import { addAbsent, computeTotalAbsences, setAbsences } from '../../store/reducers/absences';
-import { computeTotalOvertime, setOvertime } from '../../store/reducers/overtime';
-import { computeDailyWage, computeMonthlySalary, setCurrentEmployee, setMonthlySalares } from '../../store/reducers/employee';
+import { setCurrentEmployee, setCurrentMonthlySalary, setDailyWage } from '../../store/reducers/employee';
 import LeavesTable from '../components/LeavesTable';
 import AbsencesTable from '../components/AbsencesTable';
 import OvertimeTable from '../components/OvertimeTable';
-import leaves from '../../_sampleData/leaves'
-import absences from '../../_sampleData/absences'
-import overtime from '../../_sampleData/overtime'
-import monthlySalaries from '../../_sampleData/monthlySalaries'
 import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns'
 import { LocalizationProvider } from '@mui/x-date-pickers';
 import { DatePicker } from '@mui/x-date-pickers/DatePicker';
 import { formatISO } from 'date-fns';
+import { axiosAuth, encryptParams, verifyParams } from '../../auth/authParams';
+import { setLeaves, setRemainingLeaves } from '../../store/reducers/leaves';
+import { setAbsences, setTotalAbsences } from '../../store/reducers/absences';
+import { setOvertime, setTotalOvertime } from '../../store/reducers/overtime';
 const style = {
   position: 'absolute',
   top: '50%',
@@ -41,6 +38,7 @@ const style = {
 
 export default function EmployeeInfo() {
 
+  const user = useSelector(state => state.logged)
   const emp = useSelector(state => state.employee)
   const leave = useSelector(state => state.leaves)
   const comp = useSelector(state => state.company)
@@ -63,69 +61,131 @@ export default function EmployeeInfo() {
   const [absentDateStart, setAbsentDateStart] = useState(new Date())
   const [absentDateEnd, setAbsentDateEnd] = useState(new Date())
 
-  const [reason, setReason] = useState('')
-
   useEffect(() => {
     const initalizeReducers = async () => {
 
-      const employee = _.find(emp.employees, { accountID: Number(id) })
+      const employee = _.find(emp.employees, { employeeID: id })
 
-      await dispatch(setCurrentEmployee(employee))
-
-      // await dispatch(setLeaves(leaves))
-
-      // await dispatch(setAbsences(absences))
-
-      // await dispatch(setOvertime(overtime))
-
-      await dispatch(setMonthlySalares(monthlySalaries))
-
-      await dispatch(computeRemainingLeaves({
-        companyLeaves: comp.company.leaves,
-        id: employee?.accountID
-      }))
-
-      await dispatch(computeTotalAbsences({
-        id: employee?.accountID,
-        leaves: (comp.company.leaves - leave.employee.remainingLeaves),
-        companyLeaves: comp.company.leaves
-      }))
-
-      await dispatch(computeTotalOvertime({
-        id: employee?.accountID,
-        companyOvertimeLimit: comp.company.overtimeLimit
-      }))
-
-      await dispatch(computeDailyWage({ id: employee?.accountID }))
-
-      await dispatch(computeMonthlySalary({
-        id: employee?.accountID,
-        overtime: ot.employee.totalOvertime,
-        leavesRemaining: leave.employee.remainingLeaves,
-        totalAbsences: abs.employee.totalAbsences
-      }))
-
+      dispatch(setCurrentEmployee(employee))
+      await getEmployeeDailyWage()
+      await getEmployeeRemainingLeaves()
+      await getEmployeeAbsences()
+      await getEmployeeOvertimes()
+      await getEmployeeMonthlySalary()
+      console.log("api executed");
     }
 
 
-    initalizeReducers()
+    if (router.isReady) {
+      initalizeReducers()
+    }
+    console.log('emp info useeffect checker');
+  }, [dispatch, id, emp.employees, router.isReady, getEmployeeDailyWage, getEmployeeRemainingLeaves, getEmployeeAbsences, getEmployeeOvertimes, getEmployeeMonthlySalary])
 
-  }, [dispatch, abs.employee.totalAbsences, comp.company.leaves, comp.company.overtimeLimit, emp.employees, id, leave.employee.remainingLeaves, ot.employee.totalOvertime])
+  //HANDLES GETTING EMPLOYEE DAILY WAGE
+  const getEmployeeDailyWage = useCallback(async () => {
+    const dailyWage = await axiosAuth(user.loggedIn.token).get(`/employee/dailywage/${id}`)
+      .catch(err => console.log("error: " + err))
 
-  const handleAbsentFormSubmit = (e) => {
+    if (dailyWage.status === 200) {
+      const data = await verifyParams(dailyWage.data)
+      dispatch(setDailyWage(data))
+    }
+
+  }, [dispatch, user.loggedIn.token, id])
+
+  //HANDLES GETTING EMPLOYEE REMAINING LEAVES
+  const getEmployeeRemainingLeaves = useCallback(async () => {
+    const remainingLeaves = await axiosAuth(user.loggedIn.token).get(`/employee/remainingleave/${id}`)
+
+
+    if (remainingLeaves.status === 200) {
+      const data = await verifyParams(remainingLeaves.data)
+      dispatch(setRemainingLeaves(data))
+    }
+
+    const leaves = await axiosAuth(user.loggedIn.token).get(`/employee/leave/${id}`)
+      .catch(err => console.log("error: " + err))
+
+    if (leaves.status === 200) {
+      const data = await verifyParams(leaves.data)
+      dispatch(setLeaves(data))
+    }
+
+  }, [dispatch, user.loggedIn.token, id])
+
+  //HANDLES GETTING EMPLOYEE TOTAL OVERTIME HOURS
+  const getEmployeeOvertimes = useCallback(async () => {
+    const totalOTs = await axiosAuth(user.loggedIn.token).get(`/employee/totalovertime/${id}`)
+      .catch(err => console.log("error: " + err))
+
+    if (totalOTs.status === 200) {
+      const data = await verifyParams(totalOTs.data)
+      dispatch(setTotalOvertime(data))
+    }
+
+    const ot = await axiosAuth(user.loggedIn.token).get(`/employee/overtime/${id}`)
+      .catch(err => console.log("error: " + err))
+
+    if (ot.status === 200) {
+      const data = await verifyParams(ot.data)
+      dispatch(setOvertime(data))
+    }
+
+  }, [dispatch, user.loggedIn.token, id])
+
+  //HANDLES GETTING EMPLOYEE TOTAL ABSENCES
+  const getEmployeeAbsences = useCallback(async () => {
+    const totalAbsences = await axiosAuth(user.loggedIn.token).get(`/employee/totalabsence/${id}`)
+      .catch(err => console.log("error: " + err))
+
+    if (totalAbsences.status === 200) {
+      const data = await verifyParams(totalAbsences.data)
+      dispatch(setTotalAbsences(data))
+    }
+
+    const absences = await axiosAuth(user.loggedIn.token).get(`/employee/absence/${id}`)
+      .catch(err => console.log("error: " + err))
+
+    if (absences.status === 200) {
+      const data = await verifyParams(absences.data)
+      dispatch(setAbsences(data))
+    }
+
+  }, [dispatch, user.loggedIn.token, id])
+
+  //HANDLES GETTING EMPLOYEE MONTHLY SALARY
+  const getEmployeeMonthlySalary = useCallback(async () => {
+    const monthlySal = await axiosAuth(user.loggedIn.token).get(`/employee/monthlysalary/${id}`)
+      .catch(err => console.log("error: " + err))
+
+    if (monthlySal.status === 200) {
+      const data = await verifyParams(monthlySal.data)
+      console.log(data);
+      dispatch(setCurrentMonthlySalary(data))
+    }
+
+  }, [dispatch, user.loggedIn.token, id])
+
+  //HANDLES EMPLOYEE ABSENCE SUBMITION
+  const handleAbsentFormSubmit = async (e) => {
     e.preventDefault()
 
-    let idGenerate = Math.floor((Math.random() * 1000) + 1);
 
-    dispatch(addAbsent({
-      id: idGenerate,
-      employeeId: Number(id),
-      dateStarted: formatISO(absentDateStart),
-      dateEnded: formatISO(absentDateEnd),
-      reason: reason
-    }))
-    setAbsentModal(false)
-    setReason('')
+    const encryptData = await encryptParams({
+      dateStart: formatISO(absentDateStart),
+      dateEnd: formatISO(absentDateEnd)
+    })
+
+    const setAbsence = await axiosAuth(user.loggedIn.token).post(`/employee/absence/${id}`, JSON.stringify(encryptData))
+      .catch(err => console.log("error: " + err))
+
+    if (setAbsence.status === 201) {
+      getEmployeeAbsences()
+      getEmployeeMonthlySalary()
+      setAbsentModal(false)
+    }
+
   }
 
   return (
@@ -146,9 +206,9 @@ export default function EmployeeInfo() {
                 <Avatar sx={{ bgcolor: blue[800], width: 100, height: 100, fontSize: '40px' }} />
 
                 <Box className='flex flex-col py-4 gap-1'>
-                  <Typography variant="h5" >Name: {emp.employee.firstName}</Typography>
-                  <Typography  >Position: {emp.employee.position}</Typography>
-                  <Typography  >Type: {emp.employee.employeeType}</Typography>
+                  <Typography variant="h5" >Name: {emp.employee.firstname}</Typography>
+                  <Typography  >Position: {emp.employee.pos}</Typography>
+                  <Typography  >Type: {emp.employee.empType}</Typography>
                   <Button data-testid="add-employer" onClick={() => setAbsentModal(true)} className='bg-[#0055fb] text-white hover:bg-[#001b51]' variant='contained'>Set Absent</Button>
                 </Box>
 
@@ -156,21 +216,21 @@ export default function EmployeeInfo() {
 
               <Box className='bg-[#16a085] flex flex-col justify-center items-start grow p-4 rounded-md h-full'>
 
-                <Typography variant='h6' >Salary/Hour: ${emp.employee.salaryPerHour}</Typography>
+                <Typography variant='h6' >Salary/Hour: ${emp.employee.rate}</Typography>
                 <Typography data-testid="daily-wage" variant='h6' >Daily Wage: ${emp.employee.dailyWage}</Typography>
                 <Typography data-testid="monthly-salary" variant='h6' >Monthly Salary: ${emp.employee.currMonthSal}</Typography>
 
               </Box>
 
               <Box className='bg-[#8e44ad] flex flex-col justify-center items-start grow p-4 rounded-md h-full'>
-                <Typography data-testid="remaining-leaves" variant='h6' >Leaves: {comp.company.leaves - leave.employee.remainingLeaves} days</Typography>
+                <Typography data-testid="remaining-leaves" variant='h6' >Leaves: {comp.company.allocateLeaves - leave.employee.remainingLeaves} days</Typography>
                 <Typography variant='h6' >Remaining: {leave.employee.remainingLeaves} days</Typography>
 
               </Box>
 
               <Box className='bg-[#d35400] flex flex-col justify-center items-start grow p-4 rounded-md h-full'>
                 <Typography data-testid="overtime" variant='h6' >Overtime: {ot.employee.totalOvertime} hrs</Typography>
-                <Typography variant='h6' >Absences: {abs.employee.totalAbsences} days</Typography>
+                <Typography variant='h6' >Absences: {abs.employee.totalAbsences} day/s</Typography>
               </Box>
 
             </Box>
@@ -188,15 +248,15 @@ export default function EmployeeInfo() {
             <Box>
               {/*----------------------LIST OF LEAVES TAB--------------------- */}
               {tabIndex === 0 && (
-                <LeavesTable leaves={_.filter(leave.leaves, { employeeId: emp.employee.accountID })} />
+                <LeavesTable leaves={leave.leaves} />
               )}
               {/*----------------------LIST OF ABSENCES TAB--------------------- */}
               {tabIndex === 1 && (
-                <AbsencesTable absences={_.filter(abs.absences, { employeeId: emp.employee.accountID })} />
+                <AbsencesTable absences={abs.absences} />
               )}
               {/*----------------------LIST OF OVERTIME TAB--------------------- */}
               {tabIndex === 2 && (
-                <OvertimeTable overtimes={_.filter(ot.overtime, { employeeId: emp.employee.accountID })} />
+                <OvertimeTable overtimes={ot.overtime} />
               )}
             </Box>
           </Box>
@@ -226,19 +286,6 @@ export default function EmployeeInfo() {
                 value={absentDateEnd}
                 onChange={setAbsentDateEnd}
                 renderInput={(params) => <TextField {...params} />}
-              />
-
-              <TextField
-                type="text"
-                variant="outlined"
-                color="secondary"
-                label='Reason'
-                fullWidth
-                required
-                name='reason'
-                value={reason}
-                onChange={(e) => setReason(e.target.value)}
-
               />
 
               <Button type='submit' className='bg-[#33b33d]' color='success' variant='contained'>Submit</Button>
