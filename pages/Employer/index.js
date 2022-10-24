@@ -66,38 +66,34 @@ function Employer() {
 
     useEffect(() => {
         const initializeApi = async () => {
-            await getEmployerInfo()
-            await getEmployeesInfo()
+            const employer = await axiosAuth(user.loggedIn.token).get(`/employer/${user.loggedIn.id}`)
+                .catch(err => console.log("error: " + err))
+
+            if (employer.status === 200) {
+                const data = await verifyParams(employer.data)
+                const { id } = data
+                dispatch(setCompany(data))
+                await getEmployeesInfo(id)
+            }
+
         }
 
         initializeApi()
         console.log("employer page mounted");
 
-    }, [dispatch, getEmployerInfo, getEmployeesInfo])
-
-    //HANDLES GETTING EMPLOYER ADDITIONAL INFO
-    const getEmployerInfo = useCallback(async () => {
-        const employer = await axiosAuth(user.loggedIn.token).get(`/employer/${user.loggedIn.id}`)
-            .catch(err => console.log("error: " + err))
-
-        if (employer.status === 200) {
-            const data = await verifyParams(employer.data)
-            dispatch(setCompany(data))
-        }
-
-    }, [dispatch, user.loggedIn.token, user.loggedIn.id])
+    }, [dispatch, getEmployeesInfo])
 
     //HANDLES GETTING COMPANY EMPLOYEES
-    const getEmployeesInfo = useCallback(async () => {
+    const getEmployeesInfo = useCallback(async (id) => {
         const employees = await axiosAuth(user.loggedIn.token).get('/employee')
             .catch(err => console.log("error: " + err))
 
         if (employees.status === 200) {
             const data = await verifyParams(employees.data)
-            const filterEmployees = filter(data, { companyID: comp.company.id })
+            const filterEmployees = filter(data, { companyID: id })
             dispatch(setEmployees(filterEmployees))
         }
-    }, [dispatch, user.loggedIn.token, comp.company.id])
+    }, [dispatch, user.loggedIn.token])
 
     //HANDLES EMPLOYEE DELETION
     const deleteEmployeeInfo = async (id) => {
@@ -105,33 +101,6 @@ function Employer() {
             .catch(err => console.log("error: " + err))
 
         if (deleteEmployee?.status === 200) getEmployeesInfo()
-    }
-
-    const getEmployeeLeaveRequests = (leaves) => {
-
-        const getAssocEmp = _.chain(leaves).map((leave) => {
-            const employee = _.find(emp.employees, { accountID: leave.employeeId })
-            if (employee?.associatedCompany === comp.company.accountID) {
-                return { ...leave, name: employee.firstName }
-            }
-            return null
-
-        }).filter((leave) => { return leave }).value()
-
-        return getAssocEmp;
-    }
-
-    const getEmployeeOTRequests = (overtimes) => {
-
-        const getAssocEmp = _.chain(overtimes).map((overtime) => {
-            const employee = _.find(emp.employees, { accountID: overtime.employeeId })
-            if (employee?.associatedCompany === comp.company.accountID) {
-                return { ...overtime, name: employee.firstName }
-            }
-            return null
-        }).filter((overtime) => { return overtime }).value()
-
-        return getAssocEmp;
     }
 
     return (
@@ -144,12 +113,12 @@ function Employer() {
 
                 <Box className='bg-[#fba600] flex p-4 rounded-md gap-4 h-full'>
                     <Link href='../profile'>
-                        <Avatar sx={{ bgcolor: blue[800], width: 100, height: 100, fontSize: '40px' }}>{upperCase(user.loggedIn.firstName[0])}</Avatar>
+                        <Avatar sx={{ bgcolor: blue[800], width: 100, height: 100, fontSize: '40px' }}>{upperCase(user.loggedIn.firstname[0])}</Avatar>
                     </Link>
 
                     <Box>
                         <Link href='../profile'>
-                            <Typography data-testid="name" style={{ cursor: 'pointer' }} mt={2} variant='h5' margin={0} padding={0}>{user.loggedIn.firstName} {user.loggedIn.lastName}</Typography>
+                            <Typography data-testid="name" style={{ cursor: 'pointer' }} mt={2} variant='h5' margin={0} padding={0}>{user.loggedIn.firstname} {user.loggedIn.lastname}</Typography>
                         </Link>
                         <Typography mt={2} mb={2}>Employer</Typography>
                         <Button data-testid="add-employer" className='bg-[#44bd32] text-white hover:bg-[#4cd137]' onClick={() => router.push('/employee/form')} variant='contained'>+ Add Employee</Button>
@@ -178,8 +147,6 @@ function Employer() {
                 <Box>
                     <Tabs value={tabIndex} onChange={handleTabChange}>
                         <Tab label="Employees" />
-                        <Tab label="Leave Requests" />
-                        <Tab label="Overtime Requests" />
                     </Tabs>
                 </Box>
                 <Box>
@@ -191,6 +158,7 @@ function Employer() {
                                     <TableRow>
                                         <StyledTableCell>First Name</StyledTableCell>
                                         <StyledTableCell>Last Name</StyledTableCell>
+                                        <StyledTableCell>Email</StyledTableCell>
                                         <StyledTableCell>Position</StyledTableCell>
                                         <StyledTableCell>Salary Per Hour</StyledTableCell>
                                         <StyledTableCell>Employee Type</StyledTableCell>
@@ -207,6 +175,7 @@ function Employer() {
                                                 {row.firstname}
                                             </StyledTableCell>
                                             <StyledTableCell >{row.lastname}</StyledTableCell>
+                                            <StyledTableCell >{row.email}</StyledTableCell>
                                             <StyledTableCell >{row.pos}</StyledTableCell>
                                             <StyledTableCell >{row.rate}</StyledTableCell>
                                             <StyledTableCell >{row.empType === 'fulltime' ? 'Full Time' : 'Part Time'}</StyledTableCell>

@@ -8,9 +8,11 @@ export const EmployeeStore = createSlice({
         employees: [],
         monthlySalary: [],
         employee: {
+            employeeID: '',
             empType: '',
             firstname: '',
             lastname: '',
+            email: '',
             pos: '',
             rate: 0,
             dailyWage: 0,
@@ -26,6 +28,11 @@ export const EmployeeStore = createSlice({
             const { dailywage } = action.payload
 
             state.employee.dailyWage = dailywage
+        },
+
+        setCurrentEmployee: (state, action) => {
+            const { employeeID, firstname, lastname, email, rate, empType, pos } = action.payload
+            state.employee = { ...state.employee, firstname, lastname, email, rate, empType, pos, employeeID }
         },
 
         setCurrentMonthlySalary: (state, action) => {
@@ -55,11 +62,6 @@ export const EmployeeStore = createSlice({
             const index = _.findIndex(state.employees, { accountID: action.payload })
 
             state.employees.splice(index, 1)
-        },
-
-        setCurrentEmployee: (state, action) => {
-            const { firstname, lastname, email, rate, empType, pos } = action.payload
-            state.employee = { ...state.employee, firstname, lastname, email, rate, empType, pos }
         },
 
         updateEmployee: (state, action) => {

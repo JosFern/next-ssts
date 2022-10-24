@@ -6,8 +6,8 @@ export const loggedStore = createSlice({
     initialState: {
         loggedIn: {
             id: '',
-            firstName: '',
-            lastName: '',
+            firstname: '',
+            lastname: '',
             email: '',
             role: '',
             token: ''
@@ -15,8 +15,8 @@ export const loggedStore = createSlice({
     },
     reducers: {
         setLogged: (state, action) => {
-            const { id, firstName, lastName, email, role, token } = action.payload
-            state.loggedIn = { ...state.loggedIn, id, firstName, lastName, email, role, token }
+            const { id, firstname, lastname, email, role, token } = action.payload
+            state.loggedIn = { ...state.loggedIn, id, firstname, lastname, email, role, token }
         },
     }
 })

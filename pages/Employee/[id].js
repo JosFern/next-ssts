@@ -10,7 +10,7 @@ import MoreTimeIcon from '@mui/icons-material/MoreTime';
 import PaidIcon from '@mui/icons-material/Paid';
 import { useDispatch, useSelector } from 'react-redux';
 import { useCallback, useEffect, useState } from 'react';
-import _ from 'lodash';
+import _, { upperCase } from 'lodash';
 import { useRouter } from 'next/router';
 import { setCurrentEmployee, setCurrentMonthlySalary, setDailyWage } from '../../store/reducers/employee';
 import LeavesTable from '../components/LeavesTable';
@@ -161,7 +161,6 @@ export default function EmployeeInfo() {
 
     if (monthlySal.status === 200) {
       const data = await verifyParams(monthlySal.data)
-      console.log(data);
       dispatch(setCurrentMonthlySalary(data))
     }
 
@@ -188,6 +187,69 @@ export default function EmployeeInfo() {
 
   }
 
+  //HANDLES LEAVE DELETION
+  const deleteLeave = async (id) => {
+
+    const leave = await axiosAuth(user.loggedIn.token).delete(`/employee/leave/${id}`)
+      .catch(err => console.log("error: " + err))
+
+    if (leave?.status === 200) {
+      getEmployeeRemainingLeaves()
+      getEmployeeMonthlySalary()
+    }
+
+  }
+
+  //HANDLES LEAVE APPROVE UPDATION
+  const approveLeave = async (id) => {
+
+    const encryptData = await encryptParams({ approved: true })
+
+    const leave = await axiosAuth(user.loggedIn.token).put(`/employee/leave/${id}`, JSON.stringify(encryptData))
+
+    if (leave?.status === 200) {
+      getEmployeeRemainingLeaves()
+      getEmployeeMonthlySalary()
+    }
+
+  }
+
+  //HANDLES OVERTIME DELETION
+  const deleteOT = async (id) => {
+    const ot = await axiosAuth(user.loggedIn.token).delete(`/employee/overtime/${id}`)
+      .catch(err => console.log("error: " + err))
+
+    if (ot?.status === 200) {
+      getEmployeeOvertimes(emp.employee.employeeID)
+      getEmployeeMonthlySalary()
+    }
+  }
+
+  //HANDLES OVERTIME APPROVE UPDATION
+  const approveOT = async (id) => {
+
+    const encryptData = await encryptParams({ approved: true })
+
+    const ot = await axiosAuth(user.loggedIn.token).put(`/employee/overtime/${id}`, JSON.stringify(encryptData))
+      .catch(err => console.log("error: " + err))
+
+    if (ot?.status === 200) {
+      getEmployeeOvertimes(emp.employee.employeeID)
+      getEmployeeMonthlySalary()
+    }
+  }
+
+  //HANDLES ABSENCE DELETION
+  const deleteAbsence = async (id) => {
+    const absence = await axiosAuth(user.loggedIn.token).delete(`/employee/absence/${id}`)
+      .catch(err => console.log("error: " + err))
+
+    if (absence?.status === 200) {
+      getEmployeeAbsences(emp.employee.employeeID)
+      getEmployeeMonthlySalary()
+    }
+  }
+
   return (
     <LocalizationProvider dateAdapter={AdapterDateFns}>
 
@@ -208,7 +270,7 @@ export default function EmployeeInfo() {
                 <Box className='flex flex-col py-4 gap-1'>
                   <Typography variant="h5" >Name: {emp.employee.firstname}</Typography>
                   <Typography  >Position: {emp.employee.pos}</Typography>
-                  <Typography  >Type: {emp.employee.empType}</Typography>
+                  <Typography  >Type: {upperCase(emp.employee.empType)}</Typography>
                   <Button data-testid="add-employer" onClick={() => setAbsentModal(true)} className='bg-[#0055fb] text-white hover:bg-[#001b51]' variant='contained'>Set Absent</Button>
                 </Box>
 
@@ -248,15 +310,15 @@ export default function EmployeeInfo() {
             <Box>
               {/*----------------------LIST OF LEAVES TAB--------------------- */}
               {tabIndex === 0 && (
-                <LeavesTable leaves={leave.leaves} />
+                <LeavesTable leaves={leave.leaves} deleteLeave={deleteLeave} approveLeave={approveLeave} />
               )}
               {/*----------------------LIST OF ABSENCES TAB--------------------- */}
               {tabIndex === 1 && (
-                <AbsencesTable absences={abs.absences} />
+                <AbsencesTable absences={abs.absences} deleteAbsence={deleteAbsence} />
               )}
               {/*----------------------LIST OF OVERTIME TAB--------------------- */}
               {tabIndex === 2 && (
-                <OvertimeTable overtimes={ot.overtime} />
+                <OvertimeTable overtimes={ot.overtime} deleteOT={deleteOT} approveOT={approveOT} />
               )}
             </Box>
           </Box>

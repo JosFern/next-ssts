@@ -11,6 +11,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import _, { upperCase } from 'lodash';
 import { updateAccount } from '../store/reducers/account';
 import { setLogged } from '../store/reducers/logged';
+import { axiosAuth, encryptParams, verifyParams } from '../auth/authParams';
 
 const style = {
     position: 'absolute',
@@ -28,16 +29,17 @@ const style = {
 export default function Profile() {
 
     const log = useSelector(state => state.logged)
-    const acc = useSelector(state => state.account)
     const dispatch = useDispatch()
 
     const [updateProfile, setUpdateProfile] = useState(false)
     const [updatePassword, setUpdatePassword] = useState(false)
 
     const [userInfo, setUserInfo] = useState({
-        name: '',
+        firstname: '',
+        lastname: '',
         email: '',
-        password: ''
+        password: '',
+        confirmPassword: '',
     })
 
     const [password, setPassword] = useState({
@@ -47,6 +49,7 @@ export default function Profile() {
     })
 
     const [error, setError] = useState(false)
+    const [message, setMessage] = useState('')
 
     const router = useRouter()
 
@@ -55,6 +58,17 @@ export default function Profile() {
         console.log('useeffect checker');
     }, [])
 
+    //HANDLES PASSWORD VALIDATION
+    const validation = () => {
+
+        if (userInfo.password.length < 7) return 'Password must be 8 characters or longer!'
+
+        if (userInfo.password !== userInfo.confirmPassword) return 'Passwords not matched'
+
+        return 'ok'
+    }
+
+    //HANDLES PROFILE CHANGE
     const handleProfileChange = (e) => {
         const { name, value } = e.target
         setUserInfo({
@@ -63,6 +77,54 @@ export default function Profile() {
         })
     }
 
+    //OPENS UPDATE PROFILE MODAL
+    const openUpdateProfile = async () => {
+        setUpdateProfile(true)
+        setError(false)
+
+        const getPass = await verifyParams(log.loggedIn.token)
+        const { password } = getPass
+
+        setUserInfo({ ...userInfo, firstname: log.loggedIn.firstname, lastname: log.loggedIn.lastname, email: log.loggedIn.email, password, confirmPassword: password })
+    }
+
+    //HANDLES UPDATE PROFILE SUBMITION
+    const handleUpdateProfSubmit = async (e) => {
+        e.preventDefault()
+        setError(false)
+
+        const message = validation()
+
+        if (message === 'ok') {
+
+            const data = { ...userInfo, role: log.loggedIn.role }
+
+            const encryptData = await encryptParams(data)
+
+            const profile = await axiosAuth(log.loggedIn.token).put(`/profile`, JSON.stringify(encryptData))
+
+            if (profile?.status === 200) {
+                const account = await verifyParams(profile.data)
+                    .catch(err => {
+                        console.log(err)
+                    })
+
+                const { accountID, email, firstname, lastname, role } = account
+
+                dispatch(setLogged({ id: accountID, firstname: firstname, lastname: lastname, email: email, role: role, token: profile.data }))
+
+                router.back()
+            }
+        } else {
+            setError(true)
+            setMessage(message)
+        }
+
+    }
+
+    //--------------------------------------------------------------------
+
+    //HANDLES PASSWORD CHANGE
     const handlePasswordChange = (e) => {
         const { name, value } = e.target
         setPassword({
@@ -71,17 +133,7 @@ export default function Profile() {
         })
     }
 
-    const openUpdateProfile = () => {
-        setUpdateProfile(true)
-        setError(false)
-
-        const userPass = _.find(acc.accounts, function (account) {
-            return account.email === log.loggedIn.email
-        })
-
-        setUserInfo({ ...userInfo, name: log.loggedIn.firstName, email: log.loggedIn.email, password: userPass.password })
-    }
-
+    //OPENS UPDATE PASSWORD MODAL
     const openUpdatePassword = () => {
         setUpdatePassword(true)
         setError(false)
@@ -93,28 +145,7 @@ export default function Profile() {
         })
     }
 
-    const handleUpdateProfSubmit = (e) => {
-        e.preventDefault()
-        setError(false)
-
-        const { name, email, password } = userInfo
-
-        const isExist = _.find(acc.accounts, function (account) {
-            return account.email === email
-        })
-
-        console.log(isExist);
-
-        if (isExist) {
-            setError(true)
-        } else {
-            dispatch(updateAccount({ id: log.loggedIn.id, firstName: name, email, password }))
-            dispatch(setLogged({ id: log.loggedIn.id, firstName: name, email, role: log.loggedIn.role }))
-            router.back()
-        }
-
-    }
-
+    //HANDLES UPDATE PASSWORD SUBMITION
     const handleUpdatePasswordSubmit = (e) => {
         e.preventDefault()
         setError(false)
@@ -124,9 +155,9 @@ export default function Profile() {
         <DashboardLayout>
             <Container className='flex flex-col p-4 justify-center items-center'>
                 <Box className='w-[300px] p-4 flex flex-col justify-center items-center rounded-md shadow-md gap-2 bg-white'>
-                    <Avatar sx={{ bgcolor: green[800], width: 70, height: 70 }}>{upperCase(log.loggedIn.firstName[0])}</Avatar>
+                    <Avatar sx={{ bgcolor: green[800], width: 70, height: 70 }}>{upperCase(log.loggedIn.firstname[0])}</Avatar>
 
-                    <Typography mt={2} color='gray' variant='h5' >{log.loggedIn.firstName}</Typography>
+                    <Typography mt={2} color='gray' variant='h5' >{log.loggedIn.firstname}</Typography>
 
                     <Typography color='gray' >{log.loggedIn.email}</Typography>
                     <Typography mt={2} color='gray' >role: {log.loggedIn.role}</Typography>
@@ -151,18 +182,33 @@ export default function Profile() {
                         </Typography>
                         <TextField
                             type="text"
-                            name='name'
-                            label='Name'
+                            name='firstname'
+                            label='First Name'
                             variant="outlined"
                             color="secondary"
                             margin='normal'
                             fullWidth
                             required
-                            value={userInfo.name}
+                            value={userInfo.firstname}
                             onChange={handleProfileChange}
                             error={error}
                             data-testid="update-firstname-input"
                         />
+                        <TextField
+                            type="text"
+                            name='lastname'
+                            label='Last Name'
+                            variant="outlined"
+                            color="secondary"
+                            margin='normal'
+                            fullWidth
+                            required
+                            value={userInfo.lastname}
+                            onChange={handleProfileChange}
+                            error={error}
+                            data-testid="update-lastname-input"
+                        />
+
                         <TextField
                             type="text"
                             name='email'
@@ -172,15 +218,15 @@ export default function Profile() {
                             margin='normal'
                             fullWidth
                             required
+                            disabled={true}
                             value={userInfo.email}
                             onChange={handleProfileChange}
-                            error={error}
                             data-testid="update-email-input"
                         />
 
                         <TextField
+                            type="password"
                             name='password'
-                            type="text"
                             label='Password'
                             variant="outlined"
                             color="secondary"
@@ -190,11 +236,26 @@ export default function Profile() {
                             value={userInfo.password}
                             onChange={handleProfileChange}
                             error={error}
-                            data-testid="current-password-input"
+                            data-testid="update-lastname-input"
+                        />
+
+                        <TextField
+                            type="password"
+                            name='confirmPassword'
+                            label='Confirm Password'
+                            variant="outlined"
+                            color="secondary"
+                            margin='normal'
+                            fullWidth
+                            required
+                            value={userInfo.confirmPassword}
+                            onChange={handleProfileChange}
+                            error={error}
+                            data-testid="update-lastname-input"
                         />
                         {error &&
                             <Typography className='self-center' color='error'>
-                                Email already exist
+                                {message}
                             </Typography>
                         }
 

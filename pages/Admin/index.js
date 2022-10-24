@@ -7,16 +7,14 @@ import Link from 'next/link';
 import DashboardLayout from '../components/DashboardLayout'
 import { useDispatch, useSelector } from 'react-redux';
 import _, { filter, upperCase } from 'lodash';
-import { deleteAccount, deleteAccounts, setAccounts } from '../../store/reducers/account';
-import { deleteEmployer, deleteEmployers, setEmployers } from '../../store/reducers/employer';
+import { deleteAccounts } from '../../store/reducers/account';
+import { deleteEmployers, setEmployers } from '../../store/reducers/employer';
 import { deleteCompany, setCompanies } from '../../store/reducers/company';
 import { useCallback, useEffect, useState } from 'react';
 import EmployerTable from '../components/EmpoloyerTable';
 import CompanyTable from '../components/CompanyTable';
 import AccountsTable from '../components/AccountsTable';
-import accounts from '../../_sampleData/account';
-import companies from '../../_sampleData/company';
-import { deleteEmployees } from '../../store/reducers/employee';
+import { deleteEmployees, setEmployees } from '../../store/reducers/employee';
 import axios from 'axios';
 import { axiosAuth, verifyParams } from '../../auth/authParams';
 
@@ -48,7 +46,7 @@ function Admin() {
 
     const [employerList, setEmployerList] = useState([])
     const [employeeList, setEmployeeList] = useState([])
-    const [company, setCompany] = useState(0)
+    const [company, setCompany] = useState('')
 
     const [tabIndex, setTabIndex] = useState(0);
 
@@ -61,12 +59,13 @@ function Admin() {
         const initializeApi = async () => {
             await getCompanies()
             await getEmployers()
+            await getEmployees()
         }
 
         initializeApi()
 
         console.log('useeffect checker');
-    }, [getEmployers, getCompanies])
+    }, [getEmployers, getCompanies, getEmployees])
 
     //USE TO GET EMPLOYERS DATA
     const getEmployers = useCallback(async () => {
@@ -92,6 +91,18 @@ function Admin() {
         }
     }, [dispatch, user.loggedIn.token])
 
+    //USE TO GET EMPLOYEES DATA
+    const getEmployees = useCallback(async () => {
+
+        const employees = await axiosAuth(user.loggedIn.token).get('/employee')
+            .catch(err => console.log("error: " + err))
+
+        if (employees.status === 200) {
+            const data = await verifyParams(employees.data)
+            dispatch(setEmployees(data))
+        }
+    }, [dispatch, user.loggedIn.token])
+
     //HANDLES EMPLOYER DELETION
     const handleDeleteEmployer = async (id) => {
 
@@ -103,16 +114,17 @@ function Admin() {
 
     }
 
+    //-------------------------------------------------------------------------
     //HANDLES GETTING EMPLOYERS ASSOCIATED COMPANY
     const getAssocEmployers = (companyID) => {
-        const employers = _.filter(emplyr.employers, { company: companyID })
+        const employers = _.filter(emplyr.employers, { companyID: companyID })
 
         return employers
     }
 
     //HANDLES GETTING EMPLOYEES ASSOCIATED COMPANY
     const getAssocEmployees = (companyID) => {
-        const employees = _.filter(emp.employees, { associatedCompany: companyID })
+        const employees = _.filter(emp.employees, { companyID: companyID })
 
         return employees
     }
@@ -120,37 +132,31 @@ function Admin() {
     //OPENS DELETE COMPANY MODAL
     const openDeleteCompanyModal = (companyID) => {
         setDeleteCompModal(true)
+        setCompany(companyID)
 
         const getEmployers = getAssocEmployers(companyID)
         const getEmployees = getAssocEmployees(companyID)
 
         setEmployerList(getEmployers)
         setEmployeeList(getEmployees)
-        setCompany(Number(companyID))
 
     }
 
     //HANDLES COMPANY DELETION
-    const handleDeleteCompanySubmit = (e) => {
+    const handleDeleteCompanySubmit = async (e) => {
         e.preventDefault()
 
-        const employerMap = _.map(employerList, function (emplyr) {
-            return Number(emplyr.accountID)
-        })
+        const deleteEmployee = await axiosAuth(user.loggedIn.token).delete(`/company/${company}`)
+            .catch(err => console.log("error: " + err))
 
-        const employeeMap = _.map(employeeList, function (emplye) {
-            return Number(emplye.accountID)
-        })
+        if (deleteEmployee?.status === 200) {
+            await getEmployers()
+            await getCompanies()
+            await getEmployees()
 
-        console.log(company);
+            setDeleteCompModal(false)
+        }
 
-
-        dispatch(deleteCompany(company))
-        dispatch(deleteEmployers(employerMap))
-        dispatch(deleteEmployees(employeeMap))
-        dispatch(deleteAccounts([...employerMap, ...employeeMap]))
-
-        setDeleteCompModal(false)
     }
 
     return (
@@ -161,12 +167,12 @@ function Admin() {
                 data-testid="admin-basic-info"
             >
                 <Link href='../profile'>
-                    <Avatar sx={{ bgcolor: green[800], width: 100, height: 100, fontSize: '40px' }}>{upperCase(user.loggedIn.firstName[0])}</Avatar>
+                    <Avatar sx={{ bgcolor: green[800], width: 100, height: 100, fontSize: '40px' }}>{upperCase(user.loggedIn.firstname[0])}</Avatar>
                 </Link>
 
                 <Box>
                     <Link href='../profile'>
-                        <Typography style={{ cursor: 'pointer' }} mt={2} variant='h4' margin={0} padding={0}>{user.loggedIn.firstName} {user.loggedIn.lastName}</Typography>
+                        <Typography style={{ cursor: 'pointer' }} mt={2} variant='h4' margin={0} padding={0}>{user.loggedIn.firstname} {user.loggedIn.lastname}</Typography>
                     </Link>
                     <Typography mb={2}>Admin</Typography>
                     <Box>
@@ -223,9 +229,9 @@ function Admin() {
                                 {_.map(employerList, (list, index) => (
                                     <ListItem key={index} disablePadding>
                                         <ListItemIcon>
-                                            <Avatar sx={{ bgcolor: green[800], width: 25, height: 25, fontSize: '20px' }}>{upperCase(list.firstName[0])}</Avatar>
+                                            <Avatar sx={{ bgcolor: green[800], width: 25, height: 25, fontSize: '20px' }}>{upperCase(list.firstname[0])}</Avatar>
                                         </ListItemIcon>
-                                        <ListItemText primary={`${list.firstName} ${list.lastName}`} />
+                                        <ListItemText primary={`${list.firstname} ${list.lastname}`} />
                                     </ListItem>
                                 ))}
 
@@ -239,9 +245,9 @@ function Admin() {
                                 {_.map(employeeList, (list, index) => (
                                     <ListItem key={index} disablePadding>
                                         <ListItemIcon>
-                                            <Avatar sx={{ bgcolor: green[800], width: 25, height: 25, fontSize: '20px' }}>{upperCase(list.firstName[0])}</Avatar>
+                                            <Avatar sx={{ bgcolor: green[800], width: 25, height: 25, fontSize: '20px' }}>{upperCase(list.firstname[0])}</Avatar>
                                         </ListItemIcon>
-                                        <ListItemText primary={`${list.firstName} ${list.lastName}`} />
+                                        <ListItemText primary={`${list.firstname} ${list.lastname}`} />
                                     </ListItem>
                                 ))}
                             </List>
@@ -249,7 +255,12 @@ function Admin() {
 
                     </Box>
 
-                    <Button type='submit' className='bg-[#c23616]' color='error' variant='contained'>Delete</Button>
+                    <Box className='flex gap-4'>
+                        <Button type='submit' className='bg-[#c23616]' color='error' variant='contained'>Delete</Button>
+
+                        <Button type='button' onClick={() => setDeleteCompModal(false)} className='bg-[#007ce2]' color='info' variant='contained'>Cancel</Button>
+                    </Box>
+
                 </Box>
             </Modal>
 

@@ -8,6 +8,8 @@ import Paper from '@mui/material/Paper';
 import { styled } from '@mui/material/styles';
 import _ from 'lodash';
 import { parseISO, format } from 'date-fns';
+import { Button, ButtonGroup } from '@mui/material';
+import { useSelector } from 'react-redux';
 
 const StyledTableCell = styled(TableCell)(({ theme }) => ({
     [`&.${tableCellClasses.head}`]: {
@@ -31,7 +33,10 @@ const StyledTableRow = styled(TableRow)(({ theme }) => ({
     },
 }));
 
-export default function OvertimeTable(props) {
+export default function OvertimeTable({ overtimes, deleteOT, approveOT }) {
+
+    const user = useSelector(state => state.logged)
+
     return <TableContainer component={Paper} data-testid="employer-table">
         <Table sx={{ minWidth: 700 }}>
             <TableHead>
@@ -40,18 +45,36 @@ export default function OvertimeTable(props) {
                     <StyledTableCell>Time Started</StyledTableCell>
                     <StyledTableCell>Time Ended</StyledTableCell>
                     <StyledTableCell>Reason</StyledTableCell>
+                    <StyledTableCell>Status</StyledTableCell>
+                    <StyledTableCell>Action</StyledTableCell>
                 </TableRow>
             </TableHead>
             <TableBody>
-                {_.map(props.overtimes, (row, index) => (
+                {_.map(overtimes, (row, index) => (
                     <StyledTableRow
                         key={index}
                         sx={{ '&:last-child td, &:last-child th': { border: 0 } }}
                     >
-                        <StyledTableCell >{format(parseISO(row.dateHappen), 'PPpp')}</StyledTableCell>
-                        <StyledTableCell >{format(parseISO(row.timeStart), 'PPpp')}</StyledTableCell>
-                        <StyledTableCell >{format(parseISO(row.timeEnd), 'PPpp')}</StyledTableCell>
+                        <StyledTableCell >{format(parseISO(row.dateHappen), 'PP')}</StyledTableCell>
+                        <StyledTableCell >{format(parseISO(row.timeStart), 'pp')}</StyledTableCell>
+                        <StyledTableCell >{format(parseISO(row.timeEnd), 'pp')}</StyledTableCell>
                         <StyledTableCell >{row.reason}</StyledTableCell>
+                        <StyledTableCell >{row.approved === 0 ? 'Deny' : 'Approve'}</StyledTableCell>
+                        <StyledTableCell >
+                            <ButtonGroup
+                                variant="contained"
+                                aria-label="outlined primary button group">
+                                {user.loggedIn.role === 'employer' && row.approved === 0 && <Button className='bg-[#33b33d]' color='success' onClick={() => approveOT(row.id)}>Approve</Button>}
+
+                                <Button
+                                    disabled={user.loggedIn.role === 'employee' && row.approved === 1} className='bg-[#dc3c18]'
+                                    color='error'
+                                    onClick={() => deleteOT(row.id)}
+                                >
+                                    Delete
+                                </Button>
+                            </ButtonGroup>
+                        </StyledTableCell>
                     </StyledTableRow>
                 ))}
             </TableBody>
